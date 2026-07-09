@@ -22,15 +22,66 @@ model User {
   gender         Gender?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  accounts       Account[]
-  moderationLogs ModerationLog[]
-  participants   Participant[]
-  reportsAgainst Report[]        @relation("ReportsAgainstUser")
-  reportsMade    Report[]        @relation("ReportsByUser")
-  sessions       Session[]
+
+  // --- NM Score (matchmaking priority gamification) ---
+  xp                   Int       @default(0)
+  currentStreak        Int       @default(0)
+  longestStreak        Int       @default(0)
+  streakFreezes        Int       @default(0)
+  lastActiveDate       DateTime? // UTC calendar date of last counted session, for streak/session idempotency
+  totalSessions        Int       @default(0)
+  conversationsStarted Int       @default(0)
+  conversationsCompleted Int     @default(0)
+  skipCount            Int       @default(0)
+  nmScore              Int       @default(10) // cached 0-100, recomputed on relevant events
+  nmTier               NMTier    @default(EXPLORER)
+
+  accounts        Account[]
+  moderationLogs  ModerationLog[]
+  participants    Participant[]
+  reportsAgainst  Report[]        @relation("ReportsAgainstUser")
+  reportsMade     Report[]        @relation("ReportsByUser")
+  sessions        Session[]
+  achievements    UserAchievement[]
+  dailyActivity   DailyActivity[]
 
   @@index([isAnonymous])
   @@index([banned])
+  @@index([nmScore])
+}
+
+// One row per UTC calendar day a user is counted as active, powering the
+// GitHub/LeetCode-style contribution heatmap. Written by registerDailySession;
+// never backfilled for history predating this table.
+model DailyActivity {
+  id           String   @id @default(uuid())
+  userId       String
+  date         DateTime @db.Date
+  sessionCount Int      @default(1)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementKey String
+  unlockedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementKey])
+  @@index([userId])
+}
+
+enum NMTier {
+  EXPLORER
+  REGULAR
+  ACTIVE
+  DEDICATED
+  ELITE
+  LEGEND
 }
 
 model Account {

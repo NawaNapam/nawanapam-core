@@ -1,9 +1,54 @@
 // app/api/finalize-room/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, Prisma } from "@prisma/client";
+import { recomputeAndPersistScore } from "@/lib/nmScoreService";
+import { XP_AWARDS } from "@/lib/nmScore";
 
 const prisma = new PrismaClient();
 const SHARED_SECRET = process.env.NEXT_SHARED_SECRET || "change_me_now";
+
+// Anti-abuse: a conversation must last at least this long to count as
+// "completed" rather than a skip. Filters out instant open/close spam.
+const MIN_COMPLETION_MS = 20_000;
+
+async function awardConversationOutcome(
+  participants: ParticipantPayload[],
+  startedAtDate: Date | null,
+  endedAtDate: Date | null
+) {
+  // Solo/empty rooms aren't real conversations — nothing to score.
+  if (participants.length < 2) return;
+
+  const end = endedAtDate ?? new Date();
+
+  for (const p of participants) {
+    try {
+      const joined = p.joinedAt ? new Date(String(p.joinedAt)) : startedAtDate ?? end;
+      const durationMs = end.getTime() - joined.getTime();
+      const completed = durationMs >= MIN_COMPLETION_MS;
+
+      await prisma.user.update({
+        where: { id: p.userId },
+        data: completed
+          ? {
+              conversationsStarted: { increment: 1 },
+              conversationsCompleted: { increment: 1 },
+              xp: { increment: XP_AWARDS.CONVERSATION_COMPLETED },
+            }
+          : {
+              conversationsStarted: { increment: 1 },
+              skipCount: { increment: 1 },
+              xp: { increment: XP_AWARDS.REPEATED_SKIP },
+            },
+      });
+
+      await recomputeAndPersistScore(prisma, p.userId);
+    } catch (err) {
+      // Never let scoring failures block room finalization.
+      console.error("nm-score conversation outcome error", p.userId, err);
+    }
+  }
+}
 
 // strict date parsing
 function parseDateStrict(input: string | number | null | undefined, fieldName = "date"): Date {
@@ -97,6 +142,8 @@ export async function POST(req: NextRequest) {
         await tx.chatRoom.create({ data: createData });
       });
 
+      await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
+
       return NextResponse.json({ ok: true, created: true, roomId }, { status: 201 });
     } catch (createErr: unknown) {
       if (createErr instanceof Prisma.PrismaClientKnownRequestError && createErr.code === "P2002") {
@@ -136,6 +183,8 @@ export async function POST(req: NextRequest) {
               }
             }
           });
+
+          await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
 
           return NextResponse.json({ ok: true, updated: true, roomId }, { status: 200 });
         } catch (updateErr) {

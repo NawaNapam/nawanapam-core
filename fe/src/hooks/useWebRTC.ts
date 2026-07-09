@@ -42,8 +42,9 @@ function playVideoSafely(
 
   // console.log(`[WebRTC] Attempting to play ${streamType} video`);
 
-  // Force browser to acknowledge the video element
-  video.load();
+  // NOTE: no video.load() here — srcObject updates the element on its own,
+  // and calling load() while a play() from another call site is still
+  // pending is what triggers "AbortError: play() interrupted by new load".
 
   const playPromise = video.play();
 
@@ -53,6 +54,10 @@ function playVideoSafely(
         // console.log(`[WebRTC] ✅ ${streamType} video playing`);
       })
       .catch((error) => {
+        // Benign: a later playVideoSafely() call for the same element
+        // superseded this one before it resolved. Nothing to retry.
+        if (error.name === "AbortError") return;
+
         console.warn(
           `[WebRTC] ${streamType} video autoplay blocked:`,
           error.message

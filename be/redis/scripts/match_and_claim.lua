@@ -48,16 +48,28 @@ end
 
 local tried = {}
 local candidate = nil
-local candidatePool = nil
 
--- search candidates
+-- NM Score: cap how many eligible candidates we collect before weighting,
+-- so a large pool can't make a single match request expensive.
+local MAX_CANDIDATES = 50
+-- Every user gets at least this much weight, so brand-new/unscored users
+-- (nmScore field absent) still have a real chance at a match.
+local MIN_WEIGHT = 1
+
+local eligible = {}      -- list of candidate ids, in discovery order
+local weights = {}       -- candidate id -> weight
+local totalWeight = 0
+
+-- collect all eligible (compatible, non-stale, available) candidates
 for _, pool in ipairs(pools) do
   redis.call("SREM", pool, requester)
   local members = redis.call("SMEMBERS", pool)
-  
+
   redis.log(redis.LOG_WARNING, string.format("[LUA] Checking pool %s, found %d members", pool, #members))
 
   for _, cand in ipairs(members) do
+    if #eligible >= MAX_CANDIDATES then break end
+
     if cand ~= requester and not tried[cand] then
       local hash = redis.call("HGETALL", "user:" .. cand)
 
@@ -69,29 +81,23 @@ for _, pool in ipairs(pools) do
         local lastSeen = tonumber(map["lastSeen"] or "0")
         local candGender = string.lower(map["gender"] or "random")
         local candPref = string.lower(map["prefGender"] or "random")
-
-        -- DEBUG: Log candidate info
-        redis.log(redis.LOG_WARNING, string.format("[LUA] Candidate %s: status=%s, gender=%s, wants=%s", 
-          cand, status, candGender, candPref))
+        local candScore = tonumber(map["nmScore"] or "10") or 10
 
         if status ~= "available" or (now - lastSeen) > stale then
-          redis.log(redis.LOG_WARNING, string.format("[LUA] Candidate %s rejected: status=%s or stale", cand, status))
           tried[cand] = true
         else
           -- Check bidirectional compatibility
           local ok1 = accepts(requesterPref, candGender)  -- Does requester accept candidate's gender?
           local ok2 = accepts(candPref, requesterGender)  -- Does candidate accept requester's gender?
 
-          redis.log(redis.LOG_WARNING, string.format("[LUA] Compatibility check: requester wants %s, cand is %s = %s | cand wants %s, requester is %s = %s", 
-            requesterPref, candGender, tostring(ok1), candPref, requesterGender, tostring(ok2)))
-
           if ok1 and ok2 then
-            candidate = cand
-            candidatePool = pool
-            redis.log(redis.LOG_WARNING, string.format("[LUA] ✅ MATCH FOUND: %s <-> %s", requester, candidate))
-            break
+            tried[cand] = true
+            eligible[#eligible + 1] = cand
+            local w = math.max(candScore, MIN_WEIGHT)
+            weights[cand] = w
+            totalWeight = totalWeight + w
+            redis.log(redis.LOG_WARNING, string.format("[LUA] Eligible candidate %s (weight=%d)", cand, w))
           else
-            redis.log(redis.LOG_WARNING, string.format("[LUA] ❌ PREF_MISMATCH: %s <-> %s", requester, cand))
             tried[cand] = true
           end
         end
@@ -99,7 +105,23 @@ for _, pool in ipairs(pools) do
     end
   end
 
-  if candidate then break end
+  if #eligible >= MAX_CANDIDATES then break end
+end
+
+-- Weighted random selection: higher NM Score = better odds, never a
+-- guarantee. Every eligible candidate keeps a nonzero chance.
+if #eligible > 0 then
+  local r = math.random() * totalWeight
+  local cumulative = 0
+  for _, cand in ipairs(eligible) do
+    cumulative = cumulative + weights[cand]
+    if r <= cumulative then
+      candidate = cand
+      break
+    end
+  end
+  if not candidate then candidate = eligible[#eligible] end
+  redis.log(redis.LOG_WARNING, string.format("[LUA] ✅ MATCH FOUND (weighted): %s <-> %s", requester, candidate))
 end
 
 -- restore requester to real pool

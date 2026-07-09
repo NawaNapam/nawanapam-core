@@ -19,6 +19,7 @@ import {
 import Header from "./Header";
 import { useRouter } from "next/navigation";
 import PulseLoader from "./Loader";
+import NMBadge from "./NMBadge";
 
 type MatchPref = "RANDOM" | "MALE" | "FEMALE";
 
@@ -256,6 +257,16 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Progress */}
+        <div className="mt-8 bg-card rounded-lg p-5 sm:p-8 border border-border">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-medium text-foreground">Your Progress</h2>
+            <Zap size={22} className="text-signature-coral" />
+          </div>
+
+          <NMBadge />
         </div>
       </main>
     </div>

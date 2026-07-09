@@ -18,6 +18,9 @@ export async function GET(_request: NextRequest) {
       totalReports,
       pendingReports,
       bannedUsers,
+      avgNmScore,
+      avgStreak,
+      nmTierBreakdown,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { banned: false } }),
@@ -26,6 +29,9 @@ export async function GET(_request: NextRequest) {
       prisma.report.count(),
       prisma.report.count({ where: { status: "PENDING" } }),
       prisma.user.count({ where: { banned: true } }),
+      prisma.user.aggregate({ _avg: { nmScore: true } }),
+      prisma.user.aggregate({ _avg: { currentStreak: true } }),
+      prisma.user.groupBy({ by: ["nmTier"], _count: { _all: true } }),
     ]);
 
     // Get recent reports
@@ -61,6 +67,12 @@ export async function GET(_request: NextRequest) {
         totalReports,
         pendingReports,
         bannedUsers,
+        avgNmScore: avgNmScore._avg.nmScore ?? 0,
+        avgStreak: avgStreak._avg.currentStreak ?? 0,
+        nmTierBreakdown: nmTierBreakdown.map((row) => ({
+          tier: row.nmTier,
+          count: row._count._all,
+        })),
       },
       recentReports,
       recentUsers,

@@ -25,8 +25,9 @@ import { useSession } from "next-auth/react";
 
 import { useGetUser } from "@/hooks/use-getuser";
 import { useRoomChat } from "@/hooks/useRoomChat";
-import { useSignaling, onAuthOk } from "@/hooks/SocketProvider";
+import { useSignaling, onAuthOk, onNMUpdate } from "@/hooks/SocketProvider";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import StreakMilestoneModal from "./StreakMilestoneModal";
 import "@/styles/ext.css";
 import { Switch } from "@radix-ui/react-switch";
 
@@ -505,6 +506,18 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
     };
   }, [userId, status, start]);
 
+  const [milestoneStreak, setMilestoneStreak] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!userId) return;
+    const unsubscribe = onNMUpdate((data) => {
+      if (data.milestoneStreak) setMilestoneStreak(data.milestoneStreak);
+    });
+    return () => {
+      unsubscribe?.();
+    };
+  }, [userId]);
+
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -659,6 +672,10 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-surface-dark flex flex-col font-sans">
+      <StreakMilestoneModal
+        streak={milestoneStreak}
+        onClose={() => setMilestoneStreak(null)}
+      />
       {/* Header */}
       <header
         className="absolute top-0 inset-x-0 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between"

@@ -240,6 +240,28 @@ export function onMatchError(cb: (err: unknown) => void) {
   return () => socket?.off("match:error", handler);
 }
 
+export type NMUpdatePayload = {
+  tier: string;
+  xp: number;
+  currentStreak: number;
+  longestStreak: number;
+  newAchievements: { key: string; name: string; description: string }[];
+  milestoneStreak: number | null;
+};
+
+export function onNMUpdate(cb: (data: NMUpdatePayload) => void) {
+  initSocket();
+  if (!socket) throw new Error("Socket not initialized");
+
+  const handler = (data: NMUpdatePayload) => {
+    log("nm:update", "NM score update:", data);
+    cb(data);
+  };
+
+  socket.on("nm:update", handler);
+  return () => socket?.off("nm:update", handler);
+}
+
 export function onEndOk(cb: () => void) {
   initSocket();
   if (!socket) throw new Error("Socket not initialized");

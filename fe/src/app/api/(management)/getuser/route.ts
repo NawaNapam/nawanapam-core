@@ -24,6 +24,16 @@ export async function GET(_request: Request) {
       banned: true,
       createdAt: true,
       updatedAt: true,
+      nmTier: true,
+      currentStreak: true,
+      longestStreak: true,
+      xp: true,
+      streakFreezes: true,
+      achievements: {
+        select: { achievementKey: true, unlockedAt: true },
+        orderBy: { unlockedAt: "desc" },
+      },
+      // nmScore intentionally excluded — the raw score is never exposed to clients.
     },
   });
   return NextResponse.json(user);
