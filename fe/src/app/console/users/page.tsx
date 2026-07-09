@@ -37,6 +37,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
@@ -47,6 +53,7 @@ import {
   Trash2,
   Phone,
   Eye,
+  Download,
 } from "lucide-react";
 
 interface User {
@@ -83,6 +90,7 @@ export default function UsersPage() {
   }>({ open: false, userId: "", action: "ban", username: "" });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const canBanUsers =
     admin && (admin.role === "ADMIN" || admin.role === "SUPER_ADMIN");
@@ -120,6 +128,58 @@ export default function UsersPage() {
     e.preventDefault();
     setPage(1);
     fetchUsers();
+  };
+
+  const handleExport = async (format: "excel" | "json") => {
+    try {
+      setExporting(true);
+      const params = new URLSearchParams({ export: "true" });
+      if (search) params.append("search", search);
+      if (bannedFilter !== "all") params.append("banned", bannedFilter);
+
+      const response = await fetch(`/api/admin/manage/users?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch users for export");
+      const data = await response.json();
+      const exportUsers: User[] = data.users;
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify(exportUsers, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `users-${timestamp}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const XLSX = await import("xlsx");
+        const rows = exportUsers.map((user) => ({
+          ID: user.id,
+          Email: user.email,
+          Username: user.username || "",
+          Name: user.name || "",
+          Anonymous: user.isAnonymous,
+          Banned: user.banned,
+          "Phone Number": user.phoneNumber || "",
+          Gender: user.gender || "",
+          "Rooms Joined": user._count.participants,
+          "Reports Made": user._count.reportsMade,
+          "Reports Against": user._count.reportsAgainst,
+          "Joined At": new Date(user.createdAt).toISOString(),
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+        XLSX.writeFile(workbook, `users-${timestamp}.xlsx`);
+      }
+    } catch (error) {
+      console.error("Failed to export users:", error);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleBanAction = async (
@@ -241,6 +301,29 @@ export default function UsersPage() {
                 <SelectItem value="true">Banned Only</SelectItem>
               </SelectContent>
             </Select>
+
+            {canBanUsers && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="shrink-0"
+                    disabled={exporting}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {exporting ? "Exporting..." : "Export"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleExport("excel")}>
+                    Export as Excel (.xlsx)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("json")}>
+                    Export as JSON
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Desktop Table */}

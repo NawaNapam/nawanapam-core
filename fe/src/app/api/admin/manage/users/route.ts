@@ -16,6 +16,11 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const banned = searchParams.get("banned");
     const isAnonymous = searchParams.get("isAnonymous");
+    const isExport = searchParams.get("export") === "true";
+
+    if (isExport && !hasAdminRole(admin, "ADMIN")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const skip = (page - 1) * limit;
 
@@ -38,8 +43,7 @@ export async function GET(request: NextRequest) {
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
-        skip,
-        take: limit,
+        ...(isExport ? {} : { skip, take: limit }),
         orderBy: { createdAt: "desc" },
         select: {
           id: true,

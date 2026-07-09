@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "layout": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@layoutdesign/context",
+        "serve"
+      ]
+    }
+  }
+}
