@@ -63,9 +63,9 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <h1 className="mb-8 text-3xl font-bold">Dashboard</h1>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="p-4 sm:p-8">
+        <Skeleton className="mb-6 h-9 w-48" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
               <CardHeader>
@@ -117,14 +117,16 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to the admin console</p>
+    <div className="p-4 sm:p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
+        <p className="text-sm text-muted-foreground sm:text-base">
+          Welcome to the admin console
+        </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -138,7 +140,9 @@ export default function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{stat.value}</div>
+                <div className="text-2xl font-bold sm:text-3xl">
+                  {stat.value}
+                </div>
                 <p className="text-sm text-muted-foreground">{stat.subtitle}</p>
               </CardContent>
             </Card>
@@ -146,7 +150,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Recent Reports */}
         <Card>
           <CardHeader>

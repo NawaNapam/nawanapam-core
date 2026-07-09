@@ -178,7 +178,7 @@ export default function RoomsPage() {
 
         <CardContent>
           {/* Desktop Table */}
-          <div className="hidden overflow-x-auto md:block">
+          <div className="hidden overflow-x-auto lg:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -228,7 +228,7 @@ export default function RoomsPage() {
           </div>
 
           {/* Mobile Cards */}
-          <div className="space-y-4 md:hidden">
+          <div className="space-y-4 lg:hidden">
             {rooms.map((room) => (
               <Card key={room.id}>
                 <CardContent className="pt-6">

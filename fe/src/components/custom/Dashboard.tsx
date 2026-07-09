@@ -87,7 +87,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col-reverse lg:flex-row gap-8 mt-15">
           {/* Tips Card */}
-          <div className="bg-card rounded-lg p-8 border border-border flex-1">
+          <div className="bg-card rounded-lg p-5 sm:p-8 border border-border flex-1">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-md border border-border">
@@ -174,7 +174,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-card rounded-lg p-8 border border-border flex-1">
+          <div className="bg-card rounded-lg p-5 sm:p-8 border border-border flex-1">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-medium text-foreground">
                 Quick Actions

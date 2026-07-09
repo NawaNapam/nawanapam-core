@@ -29,7 +29,7 @@ export default function ProfileSettingsPage() {
   const [isEditing, setIsEditing] = useState<keyof FormDataState | null>(null);
   const [currentTime, setCurrentTime] = useState("");
   const [savingField, setSavingField] = useState<keyof FormDataState | null>(
-    null
+    null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export default function ProfileSettingsPage() {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-        }) + " IST"
+        }) + " IST",
       );
     };
     update();
@@ -77,7 +77,7 @@ export default function ProfileSettingsPage() {
   // ---------- Helpers ----------
   const setField = <K extends keyof FormDataState>(
     key: K,
-    value: FormDataState[K]
+    value: FormDataState[K],
   ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
@@ -171,29 +171,27 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-background border-b border-border hidden md:flex items-center justify-between px-6">
+      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-4 sm:px-6">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-body hover:text-foreground text-sm font-medium transition-colors"
         >
           <ArrowLeft size={16} />
-          Dashboard
+          <span className="hidden sm:inline">Dashboard</span>
         </Link>
-        <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">
+        <div className="hidden items-center gap-2 text-muted-foreground text-xs font-medium sm:flex">
           <Globe size={14} />
           <span className="font-mono tracking-wider">{currentTime}</span>
         </div>
       </header>
 
       {/* Main */}
-      <main className="pt-20 pb-10 px-6 max-w-2xl lg:max-w-5xl mx-auto">
+      <main className="pt-20 pb-10 px-4 sm:px-6 max-w-2xl lg:max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-medium tracking-tight text-foreground">
             Profile Settings
           </h1>
-          <p className="text-body mt-3">
-            Make your presence truly yours
-          </p>
+          <p className="text-body mt-3">Make your presence truly yours</p>
         </div>
 
         {/* Avatar */}
@@ -209,7 +207,7 @@ export default function ProfileSettingsPage() {
                 {(user?.name || "U").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-50 group-hover:opacity-100 transition-opacity">
               <Pencil size={22} className="text-white" />
             </div>
           </button>
@@ -237,7 +235,7 @@ export default function ProfileSettingsPage() {
         {/* Editable Fields, grouped into boxes */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Identity */}
-          <div className="space-y-6 bg-card rounded-lg p-8 border border-border">
+          <div className="space-y-6 bg-card rounded-lg p-5 sm:p-8 border border-border">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
               Identity
             </h2>
@@ -266,7 +264,7 @@ export default function ProfileSettingsPage() {
           </div>
 
           {/* Contact */}
-          <div className="space-y-6 bg-card rounded-lg p-8 border border-border">
+          <div className="space-y-6 bg-card rounded-lg p-5 sm:p-8 border border-border">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
               Contact
             </h2>
@@ -298,7 +296,7 @@ export default function ProfileSettingsPage() {
           </div>
 
           {/* About */}
-          <div className="space-y-6 bg-card rounded-lg p-8 border border-border">
+          <div className="space-y-6 bg-card rounded-lg p-5 sm:p-8 border border-border">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
               About
             </h2>
@@ -316,9 +314,7 @@ export default function ProfileSettingsPage() {
 
             {/* Gender (Dropdown) */}
             <div className="group relative">
-              <label className="text-body text-sm font-medium">
-                Gender
-              </label>
+              <label className="text-body text-sm font-medium">Gender</label>
               {isEditing === "gender" ? (
                 <div className="mt-2 flex items-center gap-3">
                   <select
@@ -388,7 +384,7 @@ function EditableField({
   >;
   setField: <K extends keyof FormDataState>(
     key: K,
-    value: FormDataState[K]
+    value: FormDataState[K],
   ) => void;
   handleSave: (field: keyof FormDataState) => void;
   savingField: keyof FormDataState | null;

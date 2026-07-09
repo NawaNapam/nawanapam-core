@@ -14,9 +14,11 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAuthProvider>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen flex-col overflow-hidden lg:flex-row">
         <AdminSidebar />
-        <main className="flex-1 overflow-y-auto bg-background">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto bg-background">
+          {children}
+        </main>
       </div>
     </AdminAuthProvider>
   );
