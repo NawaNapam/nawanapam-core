@@ -1,11 +1,11 @@
 # NawaNapam.website
 
-> **⚠️ PROPRIETARY - INTERNAL USE ONLY**  
+> **PROPRIETARY - INTERNAL USE ONLY**  
 > This codebase is proprietary and confidential. Access and usage are restricted to authorized employees of NawaNapam organization only. Unauthorized access, use, distribution, or reproduction is strictly prohibited.
 
 A modern, real-time anonymous video chat platform built with Next.js and Socket.IO. Connect with random strangers worldwide through instant video calls with end-to-end privacy.
 
-## 🌟 Features
+## Features
 
 - **Anonymous Video Chat**: Connect with strangers instantly without revealing your identity
 - **Smart Matching**: Gender-based filtering (random, male, female) for better matching
@@ -22,7 +22,7 @@ A modern, real-time anonymous video chat platform built with Next.js and Socket.
 - **Admin Dashboard**: Comprehensive moderation and analytics tools
 - **User Management**: Report system, moderation logs, and user banning
 
-## 🚀 Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -50,7 +50,7 @@ A modern, real-time anonymous video chat platform built with Next.js and Socket.
 - **Primary DB**: PostgreSQL (via Prisma)
 - **Cache/Sessions**: Redis (ioredis)
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 ├── be/                          # Backend server
@@ -87,7 +87,7 @@ A modern, real-time anonymous video chat platform built with Next.js and Socket.
 │       └── schema.prisma       # Database schema
 ```
 
-## 🛠️ Installation
+## Installation
 
 ### Prerequisites
 
@@ -162,7 +162,7 @@ npm run dev
 - **Frontend**: http://localhost:3000
 - **Backend**: http://localhost:8080
 
-## 🎮 Usage
+## Usage
 
 ### For Users
 
@@ -200,7 +200,7 @@ npm run build
 npm start
 ```
 
-## 🔐 Security Features
+## Security Features
 
 - **CSRF Protection**: Edge CSRF tokens for forms
 - **Rate Limiting**: Upstash Redis-based rate limiting
@@ -210,7 +210,7 @@ npm start
 - **Session Management**: Secure cookie-based sessions
 - **Environment Variables**: Sensitive data in .env files
 
-## 📱 PWA Features
+## PWA Features
 
 - Offline support
 - Install to home screen
@@ -219,7 +219,7 @@ npm start
 - Background sync
 - Push notifications (coming soon)
 
-## 🎨 Customization
+## Customization
 
 ### Styling
 
@@ -233,7 +233,7 @@ npm start
 - Custom components in `fe/src/components/custom/`
 - Radix UI primitives for accessibility
 
-## 🔧 Configuration
+## Configuration
 
 ### Frontend Environment Variables
 
@@ -256,7 +256,7 @@ REDIS_PORT=6379          # Redis port
 STALE_MS=30000           # Stale connection timeout
 ```
 
-## 📊 Database Schema
+## Database Schema
 
 Key models:
 
@@ -272,7 +272,7 @@ Key models:
 
 See [fe/prisma/schema.prisma](fe/prisma/schema.prisma) for full schema.
 
-## 👨‍💻 Internal Development Guidelines
+## Internal Development Guidelines
 
 > **For Authorized Employees Only**
 
@@ -294,26 +294,26 @@ Please follow these steps when working on the codebase:
 - **Never share code or credentials outside the organization**
 - **Always use VPN when accessing production systems**
 
-## 📝 License
+## License
 
 **Proprietary and Confidential**
 
 This codebase is the exclusive property of NawaNapam organization. All rights reserved.
 
-- ❌ No public distribution
-- ❌ No unauthorized use or modification
-- ❌ No sharing outside the organization
-- ✅ Internal use by authorized employees only
+- No public distribution
+- No unauthorized use or modification
+- No sharing outside the organization
+- Internal use by authorized employees only
 
 For licensing inquiries, contact the legal department.
 
-## 🐛 Known Issues
+## Known Issues
 
 - Camera switching on iOS requires page refresh
 - Some Android devices need manual permissions
 - WebRTC connections may fail on restrictive networks
 
-## 🔮 Roadmap
+## Roadmap
 
 - [ ] Group video chat (3+ people)
 - [ ] Screen sharing
@@ -326,7 +326,7 @@ For licensing inquiries, contact the legal department.
 - [ ] Voice-only mode
 - [ ] Recording feature (with consent)
 
-## 📞 Internal Support
+## Internal Support
 
 For issues, questions, or suggestions (employees only):
 
@@ -334,16 +334,16 @@ For issues, questions, or suggestions (employees only):
 - **Internal Chat**: Contact the development team on Slack/Teams
 - **Email**: support@nawanapam.com (internal only)
 
-## 🌐 Links
+## Links
 
 - **Website**: [nawanapam.com](https://nawanapam.com)
 
-## 👥 Development Team
+## Development Team
 
 - **NawaNapam Internal Development Team**
 - For team roster and contacts, see internal documentation
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Next.js team for the amazing framework
 - Socket.IO for real-time communication

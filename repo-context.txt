@@ -1,0 +1,940 @@
+────────────────────────────────────────────────────────────────────────────────
+Using gpt-4o model with API key from environment.
+Aider v0.86.2
+Main model: gpt-4o with diff edit format
+Weak model: gpt-4o-mini
+Git repo: .git with 272 files
+Repo-map: using 4096 tokens, auto refresh
+Here are summaries of some files present in my git repository.
+Do not propose changes to these files, treat them as *read-only*.
+If you need to edit any of these files, ask me to *add them to the chat* first.
+
+be/scripts/reverse-port.js:
+⋮
+│const reversePort = (port = 8080) => {
+│  try {
+│    console.log(`Setting up ADB reverse for backend port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: "inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: ${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+be/src/services/socket.service.ts:
+⋮
+│export class SocketService {
+│  private static instance: SocketService | null = null;
+│  private _io: SocketIOServer | null = null;
+│
+│  private constructor(server: httpServer) {
+│    this._io = new SocketIOServer(server);
+│  }
+│
+│  // for single ton pattern
+│  public static getInstance(server?: httpServer): SocketService {
+⋮
+
+be/src/socket/authHandler.ts:
+⋮
+│export async function handleAuth(socket: Socket, payload: any) {
+│  const { userId, username, gender } = payload || {};
+│  if (!userId) {
+│    socket.emit("auth:error", "userId required");
+│    return;
+│  }
+│
+│  socket.data.userId = userId;
+│  socket.data.username = username ?? "";
+│  socket.data.gender = gender ?? ""; // Store user's actual gender
+│
+⋮
+
+be/src/socket/finalizeHandler.ts:
+⋮
+│export async function handleEndRoom(
+│  io: Server,
+│  socket: Socket,
+│  payload: any
+⋮
+
+be/src/socket/heartbeatHandler.ts:
+⋮
+│export async function handleHeartbeat(socket: Socket, payload: any) {
+│  const userId = socket.data.userId;
+│  if (!userId) return;
+│
+│  const now = Date.now();
+│  await redis.hset(`user:${userId}`, { lastSeen: String(now), socketId: 
+socket.id });
+│
+│//   const lat = payload?.lat;
+│//   const lon = payload?.lon;
+│//   if (lat && lon) {
+⋮
+
+be/src/socket/rtchandler.ts:
+⋮
+│type RoomState = {
+│  members: Set<string>; // socket.id set
+│  users: Set<string>; // userId set
+│  offererUserId?: string; // chosen once both join
+⋮
+
+be/src/utils/redis/redisClient.ts:
+⋮
+│export async function safeEvalSha(sha: string, ...args: unknown[]) {
+│  return redis.evalsha(sha, 0, ...(args as string[]));
+⋮
+
+be/src/utils/redis/scripts.ts:
+⋮
+│export async function loadScripts() {
+│  const matchLua = fs.readFileSync(path.join(scriptsDir, 
+"match_and_claim.lua"), "utf8");
+│  const finalizeLua = fs.readFileSync(path.join(scriptsDir, 
+"finalize_room.lua"), "utf8");
+│  scripts.matchSha = String(await redis.script("LOAD", matchLua));
+│  scripts.finalizeSha = String(await redis.script("LOAD", finalizeLua));
+│  console.log("Redis scripts loaded", scripts);
+⋮
+
+fe/middleware.ts:
+⋮
+│async function handleAdminRoutes(req: NextRequest) {
+│  const isAdminLoginPage = req.nextUrl.pathname === "/console/login";
+│  const isAdminRoute = req.nextUrl.pathname.startsWith("/console");
+│
+│  // Check admin session
+│  const adminSession = req.cookies.get("admin_session")?.value;
+│
+│  // If on admin route (not login) without session, redirect to login
+│  if (isAdminRoute && !isAdminLoginPage && !adminSession) {
+│    return NextResponse.redirect(new URL("/console/login", req.url));
+⋮
+
+fe/next.config.ts:
+⋮
+│const nextConfig: NextConfig = {
+│  env: {
+│    NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+│  },
+│  eslint: {
+│    dirs: ["src", "pages", "components", "lib", "app"],
+│    ignoreDuringBuilds: false,
+│  },
+│  typescript: {
+│    ignoreBuildErrors: false,
+⋮
+│  async rewrites() {
+│    return [
+│      {
+│        source: "/",
+│        has: [
+│          {
+│            type: "host",
+│            value: "admin.nawanapam.com",
+│          },
+│        ],
+⋮
+
+fe/scripts/generate-favicon.js:
+⋮
+│async function generateFavicon() {
+│  console.log("Generating favicon.ico from:", inputImage);
+│
+│  try {
+│    // Generate a 32x32 ICO file
+│    await sharp(inputImage)
+│      .resize(32, 32, {
+│        fit: "contain",
+│        background: { r: 255, g: 255, b: 255, alpha: 0 },
+│      })
+⋮
+
+fe/scripts/reverse-be.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: "inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: ${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/scripts/reverse-fe.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: "inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: ${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/scripts/reverse-port.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: "inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: ${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/src/app/(routes)/(auth)/forget-pass/page.tsx:
+⋮
+│export default function ForgotPasswordPage() {
+│  return (
+│    <Public>
+│      <ForgetPassword />
+│    </Public>
+│  );
+⋮
+
+fe/src/app/Provider.tsx:
+⋮
+│type Props = { children: ReactNode; session?: Session | null };
+│
+⋮
+
+fe/src/app/api/(management)/deleteuser/route.ts:
+⋮
+│export async function DELETE(_req: Request) {
+│  return NextResponse.json(
+│    { message: "User deleted successfully", status: "yet to implement" },
+│    { status: 200 }
+│  );
+⋮
+
+fe/src/app/api/(management)/getuser/route.ts:
+⋮
+│export async function GET(_request: Request) {
+│  const session = await getServerSession(authOptions);
+│
+│  if (!session?.user?.id) {
+│    return NextResponse.json(
+│      { error: "Unauthorized", session: session || null },
+│      { status: 401 }
+│    );
+│  }
+│  const user = await prisma.user.findUnique({
+⋮
+
+fe/src/app/api/admin/analytics/route.ts:
+⋮
+│export async function GET(request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin || !hasAdminRole(admin, "MODERATOR")) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    // Get time range from query params (default to last 30 days)
+│    const { searchParams } = new URL(request.url);
+│    const days = parseInt(searchParams.get("days") || "30");
+│
+⋮
+
+fe/src/app/api/admin/auth/login/route.ts:
+⋮
+│export async function POST(request: NextRequest) {
+│  try {
+│    const body = await request.json();
+│    const { email, password } = loginSchema.parse(body);
+│
+│    // Verify credentials
+│    const admin = await verifyAdminCredentials(email, password);
+│    if (!admin) {
+│      return NextResponse.json(
+│        { error: "Invalid credentials" },
+⋮
+
+fe/src/app/api/admin/auth/logout/route.ts:
+⋮
+│export async function POST(_request: NextRequest) {
+│  try {
+│    const cookieStore = await cookies();
+│    const sessionToken = cookieStore.get("admin_session")?.value;
+│
+│    if (sessionToken) {
+│      await deleteAdminSession(sessionToken);
+│      cookieStore.delete("admin_session");
+│    }
+│
+⋮
+
+fe/src/app/api/admin/auth/me/route.ts:
+⋮
+│export async function GET(_request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│
+│    if (!admin) {
+│      return NextResponse.json({ authenticated: false }, { status: 401 });
+│    }
+│
+│    return NextResponse.json({
+│      authenticated: true,
+⋮
+
+fe/src/app/api/admin/manage/moderation/route.ts:
+⋮
+│export async function GET(request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin || !hasAdminRole(admin, "MODERATOR")) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    const { searchParams } = new URL(request.url);
+│    const page = parseInt(searchParams.get("page") || "1");
+│    const limit = parseInt(searchParams.get("limit") || "20");
+⋮
+
+fe/src/app/api/admin/manage/reports/[reportId]/route.ts:
+⋮
+│export async function PATCH(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ reportId: string }> },
+⋮
+
+fe/src/app/api/admin/manage/reports/route.ts:
+⋮
+│export async function GET(request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin || !hasAdminRole(admin, "MODERATOR")) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    const { searchParams } = new URL(request.url);
+│    const page = parseInt(searchParams.get("page") || "1");
+│    const limit = parseInt(searchParams.get("limit") || "20");
+⋮
+
+fe/src/app/api/admin/manage/rooms/route.ts:
+⋮
+│export async function GET(request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin || !hasAdminRole(admin, "MODERATOR")) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    const { searchParams } = new URL(request.url);
+│    const page = parseInt(searchParams.get("page") || "1");
+│    const limit = parseInt(searchParams.get("limit") || "20");
+⋮
+
+fe/src/app/api/admin/manage/users/[userId]/ban/route.ts:
+⋮
+│export async function POST(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ userId: string }> },
+⋮
+
+fe/src/app/api/admin/manage/users/[userId]/delete/route.ts:
+⋮
+│export async function DELETE(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ userId: string }> },
+⋮
+
+fe/src/app/api/admin/manage/users/[userId]/unban/route.ts:
+⋮
+│export async function POST(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ userId: string }> },
+⋮
+
+fe/src/app/api/admin/manage/users/route.ts:
+⋮
+│export async function GET(request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin || !hasAdminRole(admin, "MODERATOR")) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    const { searchParams } = new URL(request.url);
+│    const page = parseInt(searchParams.get("page") || "1");
+│    const limit = parseInt(searchParams.get("limit") || "20");
+⋮
+
+fe/src/app/api/admin/stats/route.ts:
+⋮
+│export async function GET(_request: NextRequest) {
+│  try {
+│    const admin = await getCurrentAdmin();
+│    if (!admin) {
+│      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+│    }
+│
+│    // Get statistics
+│    const [
+│      totalUsers,
+⋮
+
+fe/src/app/api/auth/forgot-password/route.ts:
+⋮
+│export async function POST(req: NextRequest) {
+│  try {
+│    const body = await req.json();
+│    const { email } = body;
+│
+│    // Basic validation
+│    if (!email) {
+│      return NextResponse.json({ error: "Email is required" }, { status: 400 
+});
+│    }
+│    // Check existing user
+⋮
+
+fe/src/app/api/auth/reset-password/route.ts:
+⋮
+│export async function POST(req: NextRequest) {
+│  try {
+│    const body = await req.json();
+│    const { email, newPassword } = body;
+│
+│    // Basic validation
+│    if (!email || !newPassword) {
+│      return NextResponse.json(
+│        { error: "Email and new password are required" },
+│        { status: 400 }
+⋮
+
+fe/src/app/api/auth/signup/route.ts:
+⋮
+│export async function POST(req: Request) {
+│  try {
+│    // Apply rate limiting
+│    const identifier = getClientIdentifier(req);
+│    const { success, limit, remaining, reset } =
+│      await authRateLimiter.limit(identifier);
+│
+│    if (!success) {
+│      return new NextResponse("Too Many Requests", {
+│        status: 429,
+⋮
+
+fe/src/app/api/auth/verify-otp/route.ts:
+⋮
+│export async function POST(req: NextRequest) {
+│  try {
+│    const body = await req.json();
+│    const { email, otp } = body;
+│
+│    // Basic validation
+│    if (!email || !otp) {
+│      return NextResponse.json(
+│        { error: "Email and OTP are required" },
+│        { status: 400 }
+⋮
+
+fe/src/app/console/analytics/page.tsx:
+⋮
+│interface AnalyticsData {
+│  timeRange: { days: number; startDate: string; endDate: string };
+│  userGrowth: Array<{ date: string; count: number }>;
+│  roomActivity: Array<{ date: string; count: number }>;
+│  reportsOverTime: Array<{ date: string; count: number }>;
+│  distributions: {
+│    userTypes: Array<{ type: string; count: number }>;
+│    roomStatus: Array<{ status: string; count: number }>;
+│    gender: Array<{ gender: string; count: number }>;
+│    reportStatus: Array<{ status: string; count: number }>;
+⋮
+
+fe/src/app/console/layout.tsx:
+⋮
+│export default function AdminLayout({
+│  children,
+⋮
+
+fe/src/app/console/reports/page.tsx:
+⋮
+│              <Button
+│                variant="outline"
+│                size="sm"
+│                onClick={() => setPage((p) => Math.max(1, p - 1))}
+│                disabled={page === 1}
+⋮
+
+fe/src/app/console/rooms/page.tsx:
+⋮
+│interface Room {
+│  id: string;
+│  status: "WAITING" | "ACTIVE" | "ENDED";
+│  topicTags: string[];
+│  createdAt: string;
+│  endedAt: string | null;
+│  lastMessageAt: string | null;
+│  participants: Participant[];
+│  reports: Array<{ id: string; status: string }>;
+│  _count: {
+⋮
+
+fe/src/app/console/settings/page.tsx:
+⋮
+│interface AdminUser {
+│  id: string;
+│  email: string;
+│  name: string | null;
+│  role: string;
+│  isActive: boolean;
+│  lastLoginAt: string | null;
+│  createdAt: string;
+⋮
+
+fe/src/app/layout.tsx:
+⋮
+│export default function RootLayout({
+│  children,
+⋮
+
+fe/src/app/page.tsx:
+⋮
+│export default function HomePage() {
+│  return (
+│    <div className="w-full h-screen">
+│      <Landing />
+│    </div>
+│  );
+⋮
+
+fe/src/components/admin/AdminAuthProvider.tsx:
+⋮
+│interface AdminUser {
+│  id: string;
+│  email: string;
+│  name: string | null;
+│  role: "SUPER_ADMIN" | "ADMIN" | "MODERATOR";
+⋮
+│interface AdminAuthContextType {
+│  admin: AdminUser | null;
+│  loading: boolean;
+│  logout: () => Promise<void>;
+│  refreshAdmin: () => Promise<void>;
+⋮
+│export function AdminAuthProvider({ children }: { children: React.ReactNode }) 
+{
+│  const [admin, setAdmin] = useState<AdminUser | null>(null);
+│  const [loading, setLoading] = useState(true);
+│  const router = useRouter();
+│
+│  const fetchAdmin = async () => {
+│    try {
+│      const response = await fetch("/api/admin/auth/me");
+│      if (response.ok) {
+│        const data = await response.json();
+⋮
+
+fe/src/components/custom/Dashboard.tsx:
+⋮
+│type MatchPref = "RANDOM" | "MALE" | "FEMALE";
+│
+⋮
+
+fe/src/components/custom/Footer.tsx:
+⋮
+│export default function Footer() {
+│  const [modalOpen, setModalOpen] = useState<string | null>(null);
+│  const currentYear = new Date().getFullYear();
+│
+│  return (
+│    <>
+│      <footer className="relative bg-black/60 backdrop-blur-2xl border-t 
+border-amber-500/20">
+│        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r 
+from-transparent via-amber-5
+│
+│        <div className="container mx-auto px-6 py-16">
+│          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+│            {/* Brand */}
+│            <div className="text-center md:text-left">
+│              <div className="flex items-center justify-center md:justify-start
+gap-4 mb-4">
+│                <div className="w-12 h-12 rounded-full overflow-hidden ring-4 
+ring-amber-500/30 sha
+⋮
+│                  <span className="bg-gradient-to-r from-amber-400 
+via-yellow-500 to-amber-300 bg-c
+│                    NawaNapam
+│                  </span>
+│                </h4>
+│              </div>
+│              <p className="text-xs text-amber-200/70">
+│                Connecting souls with respect and warmth
+│              </p>
+│              <a
+│                href="mailto:support@nawanapam.com"
+│                className="flex items-center justify-center md:justify-start 
+gap-2 mt-4 text-sm tex
+│              >
+│                <div className="p-1.5 rounded-full bg-amber-500/10 border 
+border-amber-500/30 group
+│                  <Mail
+│                    size={14}
+│                    className="group-hover:scale-110 transition-transform"
+│                  />
+│                </div>
+│                <span className="font-medium">support@nawanapam.com</span>
+│              </a>
+│            </div>
+│
+│            {/* Policy Links */}
+│            <div className="flex flex-wrap justify-center gap-6 text-sm">
+│              {Object.keys(policies).map((policy) => (
+│                <button
+│                  key={policy}
+│                  onClick={() => setModalOpen(policy)}
+│                  className="text-amber-200 hover:text-amber-100 font-medium 
+transition-all hover:t
+│                >
+│                  {policy.replace(/ of | /g, " ")}
+│                </button>
+⋮
+│            <div className="text-center md:text-right">
+│              <button
+│                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+│                className="inline-flex items-center gap-2 text-sm font-medium 
+text-amber-200 hover:
+│              >
+│                <div className="p-2 rounded-full bg-amber-500/10 border 
+border-amber-500/30 group-h
+│                  <ArrowUp
+│                    size={16}
+│                    className="group-hover:-translate-y-1 transition-transform"
+│                  />
+⋮
+
+fe/src/components/custom/Header.tsx:
+⋮
+│interface BeforeInstallPromptEvent extends Event {
+│  prompt: () => Promise<void>;
+│  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+⋮
+
+fe/src/components/custom/NetworkStatus.tsx:
+⋮
+│export function NetworkStatus() {
+│  const [isOnline, setIsOnline] = useState(true);
+│  const [showBanner, setShowBanner] = useState(false);
+│
+│  useEffect(() => {
+│    // Set initial state
+│    setIsOnline(navigator.onLine);
+│    setShowBanner(!navigator.onLine);
+│
+│    const handleOnline = () => {
+⋮
+
+fe/src/components/custom/UpdateProfileForm.tsx:
+⋮
+│type GenderType = "MALE" | "FEMALE" | "OTHER";
+│
+⋮
+
+fe/src/components/custom/VideoChat.tsx:
+⋮
+│interface VideoChatPageProps {
+│  gender: string;
+⋮
+
+fe/src/components/custom/WebVitals.tsx:
+⋮
+│export function WebVitals() {
+│  useReportWebVitals((metric) => {
+│    // Log in development
+│    if (process.env.NODE_ENV === "development") {
+│      console.log(metric);
+│    }
+│
+│    // Send to analytics in production
+│    // The Vercel Analytics component will handle this automatically
+│  });
+│
+⋮
+
+fe/src/components/ui/aspect-ratio.tsx:
+⋮
+│function AspectRatio({
+│  ...props
+⋮
+
+fe/src/components/ui/calendar.tsx:
+⋮
+│function Calendar({
+│  className,
+│  classNames,
+│  showOutsideDays = true,
+│  captionLayout = "label",
+│  buttonVariant = "ghost",
+│  formatters,
+│  components,
+│  ...props
+⋮
+
+fe/src/components/ui/card.tsx:
+⋮
+│function Card({ className, ...props }: React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card"
+│      className={cn(
+│        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border 
+py-6 shadow-sm",
+│        className
+│      )}
+│      {...props}
+│    />
+⋮
+│function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+⋮
+│function CardDescription({ className, ...props }: React.ComponentProps<"div">) 
+{
+│  return (
+│    <div
+│      data-slot="card-description"
+│      className={cn("text-muted-foreground text-sm", className)}
+│      {...props}
+│    />
+│  )
+⋮
+│function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card-action"
+│      className={cn(
+│        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+│        className
+│      )}
+│      {...props}
+│    />
+⋮
+│function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card-footer"
+│      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/carousel.tsx:
+⋮
+│type CarouselApi = UseEmblaCarouselType[1]
+│type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+│type CarouselOptions = UseCarouselParameters[0]
+│type CarouselPlugin = UseCarouselParameters[1]
+│
+⋮
+
+fe/src/components/ui/chart.tsx:
+⋮
+│export type ChartConfig = {
+│  [k in string]: {
+│    label?: React.ReactNode
+│    icon?: React.ComponentType
+│  } & (
+│    | { color?: string; theme?: never }
+│    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+│  )
+⋮
+
+fe/src/components/ui/collapsible.tsx:
+⋮
+│function Collapsible({
+│  ...props
+⋮
+
+fe/src/components/ui/input-otp.tsx:
+⋮
+│function InputOTP({
+│  className,
+│  containerClassName,
+│  ...props
+⋮
+│function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="input-otp-group"
+│      className={cn("flex items-center", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/navigation-menu.tsx:
+⋮
+│function NavigationMenu({
+│  className,
+│  children,
+│  viewport = true,
+│  ...props
+⋮
+│}) {
+⋮
+│function NavigationMenuViewport({
+│  className,
+│  ...props
+⋮
+
+fe/src/components/ui/pagination.tsx:
+⋮
+│type PaginationLinkProps = {
+│  isActive?: boolean
+⋮
+
+fe/src/components/ui/radio-group.tsx:
+⋮
+│function RadioGroup({
+│  className,
+│  ...props
+⋮
+│function RadioGroupItem({
+│  className,
+│  ...props
+⋮
+
+fe/src/components/ui/separator.tsx:
+⋮
+│function Separator({
+│  className,
+│  orientation = "horizontal",
+│  decorative = true,
+│  ...props
+⋮
+
+fe/src/components/ui/skeleton.tsx:
+⋮
+│function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="skeleton"
+│      className={cn("bg-accent animate-pulse rounded-md", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/table.tsx:
+⋮
+│function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+│  return (
+│    <thead
+│      data-slot="table-header"
+│      className={cn("[&_tr]:border-b", className)}
+│      {...props}
+│    />
+│  )
+⋮
+│function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+│  return (
+│    <tbody
+│      data-slot="table-body"
+│      className={cn("[&_tr:last-child]:border-0", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/toggle-group.tsx:
+⋮
+│function ToggleGroup({
+│  className,
+│  variant,
+│  size,
+│  children,
+│  ...props
+⋮
+│function ToggleGroupItem({
+│  className,
+│  children,
+│  variant,
+│  size,
+│  ...props
+⋮
+
+fe/src/hooks/SocketProvider.ts:
+⋮
+│export type PeerInfo = { userId: string; username?: string };
+│export type SignalingStatus = "idle" | "searching" | "matched" | "ended";
+│
+⋮
+│function log(prefix: string, ...args: unknown[]) {
+│  // console.log(
+│  //   `%c[Signaling:${prefix}]`,
+│  //   "color: #ffb100; font-weight: bold",
+│  //   ...args
+│  // );
+⋮
+
+fe/src/hooks/use-getuser.ts:
+⋮
+│export function useGetUser() {
+│  const { data: session, status } = useSession();
+│  
+│  // Return the full user object directly from session
+│  // This ensures we get all fields including username
+│  const user = React.useMemo(() => {
+│    if (status === "authenticated" && session?.user) {
+│      return {
+│        id: session.user.id,
+│        email: session.user.email,
+⋮
+
+fe/src/hooks/use-mobile.ts:
+⋮
+│export function useIsMobile() {
+│  const [isMobile, setIsMobile] = React.useState<boolean | 
+undefined>(undefined)
+│
+│  React.useEffect(() => {
+│    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+│    const onChange = () => {
+│      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+│    }
+│    mql.addEventListener("change", onChange)
+│    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+⋮
+
+fe/src/hooks/use-update-user.ts:
+⋮
+│interface UpdateUserData {
+│  name?: string;
+│  username?: string;
+│  email?: string;
+│  password?: string;
+│  image?: string;
+⋮
+
+fe/src/lib/env-validation.ts:
+⋮
+│export type Env = z.infer<typeof envSchema>;
+│
+⋮
+
+fe/src/providers/AuthProvider.tsx:
+⋮
+│interface AuthProviderProps {
+│  children: React.ReactNode;
+⋮
+
