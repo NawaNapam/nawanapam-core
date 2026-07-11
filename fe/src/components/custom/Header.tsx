@@ -14,6 +14,7 @@ import {
   Download,
   Sun,
   Moon,
+  History,
 } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -172,6 +173,14 @@ export default function Header() {
               >
                 <LayoutDashboard size={18} />
                 Dashboard
+              </Link>
+              <Link
+                href="/call-history"
+                onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-foreground hover:bg-accent transition-colors"
+              >
+                <History size={18} />
+                Call History
               </Link>
               <Link
                 href="/settings"
@@ -342,6 +351,14 @@ export default function Header() {
           >
             <LayoutDashboard size={20} />
             <span className="text-base">Dashboard</span>
+          </Link>
+          <Link
+            href="/call-history"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-4 px-4 py-3 text-foreground hover:bg-accent rounded-lg transition-colors"
+          >
+            <History size={20} />
+            <span className="text-base">Call History</span>
           </Link>
           <Link
             href="/settings"

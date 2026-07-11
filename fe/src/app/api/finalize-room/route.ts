@@ -23,7 +23,7 @@ async function awardConversationOutcome(
 
   for (const p of participants) {
     try {
-      const joined = p.joinedAt ? new Date(String(p.joinedAt)) : startedAtDate ?? end;
+      const joined = parseJoinedAt(p.joinedAt, startedAtDate ?? end);
       const durationMs = end.getTime() - joined.getTime();
       const completed = durationMs >= MIN_COMPLETION_MS;
 
@@ -50,6 +50,57 @@ async function awardConversationOutcome(
   }
 }
 
+// Records one CallHistory row per participant so a user's recent-calls list
+// can be rendered later. Only meaningful for real 1:1 calls (2 participants).
+async function recordCallHistory(
+  participants: ParticipantPayload[],
+  roomId: string,
+  startedAtDate: Date | null,
+  endedAtDate: Date | null
+) {
+  if (participants.length < 2) return;
+
+  const end = endedAtDate ?? new Date();
+
+  for (const p of participants) {
+    const peer = participants.find((other) => other.userId !== p.userId) ?? null;
+
+    try {
+      const existing = await prisma.callHistory.findFirst({
+        where: { userId: p.userId, roomId },
+        select: { id: true },
+      });
+      if (existing) continue;
+
+      let peerUsername: string | undefined;
+      if (peer) {
+        const peerUser = await prisma.user.findUnique({
+          where: { id: peer.userId },
+          select: { username: true, name: true },
+        });
+        peerUsername = peerUser?.username ?? peerUser?.name ?? undefined;
+      }
+
+      const joined = parseJoinedAt(p.joinedAt, startedAtDate ?? end);
+      const durationSec = Math.max(0, Math.round((end.getTime() - joined.getTime()) / 1000));
+
+      await prisma.callHistory.create({
+        data: {
+          userId: p.userId,
+          roomId,
+          peerId: peer?.userId,
+          peerUsername,
+          startedAt: startedAtDate ?? joined,
+          endedAt: endedAtDate ?? end,
+          durationSec,
+        },
+      });
+    } catch (err) {
+      console.error("call-history record error", p.userId, err);
+    }
+  }
+}
+
 // strict date parsing
 function parseDateStrict(input: string | number | null | undefined, fieldName = "date"): Date {
   if (input == null || input === "") throw new Error(`${fieldName} is required`);
@@ -71,6 +122,17 @@ type ParticipantPayload = {
   userId: string;
   joinedAt?: string | number;
 };
+
+// participant.joinedAt arrives as the same epoch-ms string shape as
+// startedAt/endedAt, so it needs the same numeric-aware parsing.
+function parseJoinedAt(input: string | number | undefined, fallback: Date): Date {
+  if (input == null || input === "") return fallback;
+  try {
+    return parseDateStrict(input, "joinedAt");
+  } catch {
+    return fallback;
+  }
+}
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get("x-shared-secret");
@@ -120,19 +182,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    const finalState = typeof state === "string" ? state : "ENDED";
+    // finalize-room is always the terminal event for a room; the Redis-side
+    // "state" field (e.g. "active" from match_and_claim.lua) is lowercase and
+    // never actually reaches "ended", so it isn't a valid ChatRoomStatus.
+    const VALID_STATES = ["WAITING", "ACTIVE", "ENDED"] as const;
+    const upperState = typeof state === "string" ? state.toUpperCase() : "";
+    const finalState = (VALID_STATES as readonly string[]).includes(upperState)
+      ? (upperState as (typeof VALID_STATES)[number])
+      : "ENDED";
 
     // Fast-path create; on unique conflict fall back to update path
     try {
       const createData: Prisma.ChatRoomCreateInput = {
         id: roomId,
-        status: finalState as "WAITING" | "ACTIVE" | "ENDED",
+        status: finalState,
         createdAt: startedAtDate ?? new Date(),
         endedAt: endedAtDate ?? new Date(),
         participants: {
           create: validatedParticipants.map((p) => ({
             userId: p.userId,
-            joinedAt: p.joinedAt ? new Date(String(p.joinedAt)) : startedAtDate ?? new Date(),
+            joinedAt: parseJoinedAt(p.joinedAt, startedAtDate ?? new Date()),
             leftAt: endedAtDate ?? undefined,
           })),
         },
@@ -143,6 +212,7 @@ export async function POST(req: NextRequest) {
       });
 
       await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
+      await recordCallHistory(validatedParticipants, roomId, startedAtDate, endedAtDate);
 
       return NextResponse.json({ ok: true, created: true, roomId }, { status: 201 });
     } catch (createErr: unknown) {
@@ -153,7 +223,7 @@ export async function POST(req: NextRequest) {
             await tx.chatRoom.update({
               where: { id: roomId },
               data: {
-                status: finalState as "WAITING" | "ACTIVE" | "ENDED",
+                status: finalState,
                 endedAt: endedAtDate ?? new Date(),
               },
             });
@@ -169,7 +239,7 @@ export async function POST(req: NextRequest) {
                   data: {
                     userId: p.userId,
                     roomId,
-                    joinedAt: p.joinedAt ? new Date(String(p.joinedAt)) : startedAtDate ?? new Date(),
+                    joinedAt: parseJoinedAt(p.joinedAt, startedAtDate ?? new Date()),
                     leftAt: endedAtDate ?? undefined,
                   },
                 });
@@ -185,6 +255,7 @@ export async function POST(req: NextRequest) {
           });
 
           await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
+          await recordCallHistory(validatedParticipants, roomId, startedAtDate, endedAtDate);
 
           return NextResponse.json({ ok: true, updated: true, roomId }, { status: 200 });
         } catch (updateErr) {

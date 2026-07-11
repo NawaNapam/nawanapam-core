@@ -19,6 +19,7 @@ import {
   Camera,
   SwitchCamera,
   CameraOff,
+  Flag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
@@ -45,6 +46,10 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
   const [remoteStreamReady, setRemoteStreamReady] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportMessage, setReportMessage] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [isStreamSwapped, setIsStreamSwapped] = useState(false); // Track if streams are swapped
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
     "user",
@@ -419,6 +424,42 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
     toast.info("Chat ended.");
   };
 
+  const handleSubmitReport = async () => {
+    if (!peer?.userId) {
+      toast.error("No one to report right now.");
+      return;
+    }
+    if (!reportReason.trim() || !reportMessage.trim()) {
+      toast.error("Please select a reason and describe what happened.");
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportedUserId: peer.userId,
+          roomId: roomId ?? undefined,
+          reason: reportReason,
+          message: reportMessage,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to submit report");
+
+      toast.success("Report submitted. Our team will review it.");
+      setIsReportOpen(false);
+      setReportReason("");
+      setReportMessage("");
+    } catch {
+      toast.error("Could not submit report. Please try again.");
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   const handleSwapStreams = () => {
     // console.log("[Action] 🔄 Swapping video streams");
 
@@ -676,6 +717,89 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
         streak={milestoneStreak}
         onClose={() => setMilestoneStreak(null)}
       />
+
+      {/* Report Modal */}
+      {isReportOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+          onClick={() => !isSubmittingReport && setIsReportOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Flag size={18} /> Report {peer?.username ?? "this user"}
+              </h3>
+              <button
+                onClick={() => setIsReportOpen(false)}
+                className="text-white/60 hover:text-white transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <label className="block text-sm text-white/70 mb-1">Reason</label>
+            <select
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="w-full mb-4 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white focus:border-white/40 focus:outline-none text-sm"
+            >
+              <option value="" className="bg-slate-900">
+                Select a reason
+              </option>
+              <option value="Inappropriate behavior" className="bg-slate-900">
+                Inappropriate behavior
+              </option>
+              <option value="Harassment or abuse" className="bg-slate-900">
+                Harassment or abuse
+              </option>
+              <option value="Nudity or sexual content" className="bg-slate-900">
+                Nudity or sexual content
+              </option>
+              <option value="Spam or scam" className="bg-slate-900">
+                Spam or scam
+              </option>
+              <option value="Underage user" className="bg-slate-900">
+                Underage user
+              </option>
+              <option value="Other" className="bg-slate-900">
+                Other
+              </option>
+            </select>
+
+            <label className="block text-sm text-white/70 mb-1">
+              What happened?
+            </label>
+            <textarea
+              value={reportMessage}
+              onChange={(e) => setReportMessage(e.target.value)}
+              rows={4}
+              placeholder="Describe what happened during the call..."
+              className="w-full mb-5 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/50 focus:border-white/40 focus:outline-none text-sm resize-none"
+            />
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsReportOpen(false)}
+                disabled={isSubmittingReport}
+                className="flex-1 py-2.5 rounded-xl border border-white/20 text-white hover:bg-white/10 transition disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReport}
+                disabled={isSubmittingReport}
+                className="flex-1 py-2.5 rounded-xl bg-red-500/90 hover:bg-red-600 text-white font-medium transition disabled:opacity-60"
+              >
+                {isSubmittingReport ? "Submitting..." : "Submit Report"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header
         className="absolute top-0 inset-x-0 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between"
@@ -1024,6 +1148,14 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
                   >
                     <Power size={16} /> End
                   </button>
+                  {status === "matched" && peer?.userId && (
+                    <button
+                      onClick={() => setIsReportOpen(true)}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-black/60 backdrop-blur-md hover:bg-black/80 border border-white/15 text-white rounded-full transition-all shadow-lg font-medium text-sm"
+                    >
+                      <Flag size={16} /> Report
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -1209,6 +1341,16 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
           >
             <SwitchCamera size={20} className="text-white" />
           </button>
+
+          {/* Report Button */}
+          {status === "matched" && peer?.userId && (
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="w-12 h-12 flex-shrink-0 rounded-full bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border border-white/10 flex items-center justify-center transition-all shadow-lg"
+            >
+              <Flag size={20} className="text-white" />
+            </button>
+          )}
 
           {/* Next/Start Button */}
           {status === "matched" ? (

@@ -41,8 +41,8 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-surface-dark text-on-dark">
       {/* Logo/Brand */}
-      <div className="flex h-16 shrink-0 items-center justify-center border-b border-white/10">
-        <h1 className="text-xl font-semibold">Admin Console</h1>
+      <div className="flex h-16 shrink-0 items-center justify-start px-5  border-b border-white/10">
+        <h1 className="text-xl font-semibold">Console</h1>
       </div>
 
       {/* Navigation */}

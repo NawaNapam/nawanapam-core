@@ -44,6 +44,8 @@ model User {
   sessions        Session[]
   achievements    UserAchievement[]
   dailyActivity   DailyActivity[]
+  callHistory     CallHistory[]   @relation("CallHistoryOwner")
+  callHistoryAsPeer CallHistory[] @relation("CallHistoryPeer")
 
   @@index([isAnonymous])
   @@index([banned])
@@ -149,6 +151,7 @@ model ChatRoom {
   lastMessageAt DateTime?
   participants  Participant[]
   reports       Report[]
+  callHistory   CallHistory[]
 
   @@index([status])
   @@index([createdAt])
@@ -195,6 +198,29 @@ model Report {
   @@index([roomId])
   @@index([status])
   @@index([createdAt])
+}
+
+// One row per (user, call) so a user's recent-calls list can be rendered and
+// reported against. All rows are retained for moderation; the API only ever
+// returns the most recent 15 per user.
+model CallHistory {
+  id           String    @id @default(uuid())
+  userId       String
+  roomId       String
+  peerId       String?
+  peerUsername String?
+  startedAt    DateTime?
+  endedAt      DateTime?
+  durationSec  Int?
+  createdAt    DateTime  @default(now())
+
+  user User     @relation("CallHistoryOwner", fields: [userId], references: [id], onDelete: Cascade)
+  peer User?    @relation("CallHistoryPeer", fields: [peerId], references: [id])
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([roomId])
+  @@index([peerId])
 }
 
 // model Interest {

@@ -1,7 +1,7 @@
-import Redis from "ioredis";
+import "dotenv/config";
 import fetch, { RequestInit } from "node-fetch";
+import { redis } from "../utils/redis/redisClient";
 
-const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 const STREAM_KEY = process.env.STREAM_KEY || "stream:ended_rooms";
 const GROUP = process.env.STREAM_GROUP || "ended_rooms_group";
 const CONSUMER = process.env.STREAM_CONSUMER || (`worker-${Math.floor(Math.random() * 10000)}`);
@@ -23,7 +23,19 @@ const TRIM_POLICY = process.env.STREAM_TRIM_POLICY || "~";           // approxim
 
 const HTTP_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 8000);
 
-const redis = new Redis(REDIS_URL);
+// finalize_room.lua emits `participants` as plain userId strings (the API
+// wants { userId, joinedAt? } objects) and the call's end time as
+// `finalizedAt` (the API reads `endedAt`).
+function normalizePayload(payload: any) {
+  if (!payload) return payload;
+  return {
+    ...payload,
+    endedAt: payload.endedAt ?? payload.finalizedAt,
+    participants: Array.isArray(payload.participants)
+      ? payload.participants.map((p: unknown) => (typeof p === "string" ? { userId: p } : p))
+      : payload.participants,
+  };
+}
 
 function parseEntry(entry: any): { id: string; payload?: any } | null {
   // entry => [id, [field, value, ...]]
@@ -35,7 +47,7 @@ function parseEntry(entry: any): { id: string; payload?: any } | null {
   const raw = obj["room"] ?? obj["payload"];
   if (!raw) return { id, payload: undefined };
   try {
-    return { id, payload: JSON.parse(raw) };
+    return { id, payload: normalizePayload(JSON.parse(raw)) };
   } catch {
     return { id, payload: undefined };
   }
@@ -102,9 +114,9 @@ async function processFresh() {
   // Read NEW messages only (">")
   const res: any = await redis.xreadgroup(
     "GROUP", GROUP, CONSUMER,
-    "STREAMS", STREAM_KEY, ">",
     "COUNT", BATCH,
-    "BLOCK", BLOCK_MS
+    "BLOCK", BLOCK_MS,
+    "STREAMS", STREAM_KEY, ">"
   );
   if (!res) return;
 

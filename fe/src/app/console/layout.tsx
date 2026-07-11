@@ -3,7 +3,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin Console",
+  title: "Admin | NawaNapam",
   description: "Administration dashboard",
 };
 

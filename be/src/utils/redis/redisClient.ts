@@ -1,5 +1,9 @@
 import Redis, { RedisOptions } from "ioredis";
 
+// Optional override for environments where DNS returns an unreachable address
+// family by default (e.g. NAT64-only networks failing on the literal IPv4 hop).
+const family = process.env.REDIS_FAMILY ? Number(process.env.REDIS_FAMILY) : undefined;
+
 function makeClient(label: string) {
   const url = process.env.REDIS_URL;
   if (url) {
@@ -7,6 +11,7 @@ function makeClient(label: string) {
       // good production defaults
       enableReadyCheck: true,
       maxRetriesPerRequest: 3,
+      family,
       tls: url.startsWith("rediss://")
         ? { servername: new URL(url).hostname }
         : undefined,
@@ -28,6 +33,7 @@ function makeClient(label: string) {
     port,
     username,
     password,
+    family,
     enableReadyCheck: true,
     maxRetriesPerRequest: 3,
     ...(useTLS ? { tls: { servername: host } } : {}),
