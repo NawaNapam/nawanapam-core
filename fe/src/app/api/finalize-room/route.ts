@@ -14,7 +14,7 @@ const MIN_COMPLETION_MS = 20_000;
 async function awardConversationOutcome(
   participants: ParticipantPayload[],
   startedAtDate: Date | null,
-  endedAtDate: Date | null
+  endedAtDate: Date | null,
 ) {
   // Solo/empty rooms aren't real conversations — nothing to score.
   if (participants.length < 2) return;
@@ -56,14 +56,15 @@ async function recordCallHistory(
   participants: ParticipantPayload[],
   roomId: string,
   startedAtDate: Date | null,
-  endedAtDate: Date | null
+  endedAtDate: Date | null,
 ) {
   if (participants.length < 2) return;
 
   const end = endedAtDate ?? new Date();
 
   for (const p of participants) {
-    const peer = participants.find((other) => other.userId !== p.userId) ?? null;
+    const peer =
+      participants.find((other) => other.userId !== p.userId) ?? null;
 
     try {
       const existing = await prisma.callHistory.findFirst({
@@ -82,7 +83,10 @@ async function recordCallHistory(
       }
 
       const joined = parseJoinedAt(p.joinedAt, startedAtDate ?? end);
-      const durationSec = Math.max(0, Math.round((end.getTime() - joined.getTime()) / 1000));
+      const durationSec = Math.max(
+        0,
+        Math.round((end.getTime() - joined.getTime()) / 1000),
+      );
 
       await prisma.callHistory.create({
         data: {
@@ -102,17 +106,23 @@ async function recordCallHistory(
 }
 
 // strict date parsing
-function parseDateStrict(input: string | number | null | undefined, fieldName = "date"): Date {
-  if (input == null || input === "") throw new Error(`${fieldName} is required`);
+function parseDateStrict(
+  input: string | number | null | undefined,
+  fieldName = "date",
+): Date {
+  if (input == null || input === "")
+    throw new Error(`${fieldName} is required`);
   if (typeof input === "number" || /^\d+$/.test(String(input))) {
     const n = Number(input);
     const d = new Date(n);
-    if (isNaN(d.getTime())) throw new Error(`${fieldName} is not a valid timestamp`);
+    if (isNaN(d.getTime()))
+      throw new Error(`${fieldName} is not a valid timestamp`);
     return d;
   }
   if (typeof input === "string") {
     const d = new Date(input);
-    if (isNaN(d.getTime())) throw new Error(`${fieldName} is not a valid ISO date string`);
+    if (isNaN(d.getTime()))
+      throw new Error(`${fieldName} is not a valid ISO date string`);
     return d;
   }
   throw new Error(`${fieldName} has unsupported type`);
@@ -125,7 +135,10 @@ type ParticipantPayload = {
 
 // participant.joinedAt arrives as the same epoch-ms string shape as
 // startedAt/endedAt, so it needs the same numeric-aware parsing.
-function parseJoinedAt(input: string | number | undefined, fallback: Date): Date {
+function parseJoinedAt(
+  input: string | number | undefined,
+  fallback: Date,
+): Date {
   if (input == null || input === "") return fallback;
   try {
     return parseDateStrict(input, "joinedAt");
@@ -142,40 +155,50 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { roomId, participants, startedAt, endedAt, state /* partsMeta (ignored) */ } = body;
+    const {
+      roomId,
+      participants,
+      startedAt,
+      endedAt,
+      state /* partsMeta (ignored) */,
+    } = body;
 
     if (!roomId || typeof roomId !== "string") {
       return NextResponse.json(
         { error: "roomId is required and must be a string" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!Array.isArray(participants) || participants.length === 0) {
       return NextResponse.json(
         { error: "participants must be a non-empty array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Validate participants: only userId and (optional) joinedAt
     const validatedParticipants: ParticipantPayload[] = participants.map(
       (p: Record<string, unknown>, idx: number) => {
-        if (!p || typeof p !== "object") throw new Error(`participant[${idx}] must be an object`);
+        if (!p || typeof p !== "object")
+          throw new Error(`participant[${idx}] must be an object`);
         if (!("userId" in p) || typeof p.userId !== "string")
-          throw new Error(`participant[${idx}].userId is required and must be a string`);
+          throw new Error(
+            `participant[${idx}].userId is required and must be a string`,
+          );
         return {
           userId: p.userId as string,
           // prefer explicit joinedAt from payload; else fall back to startedAt
-          joinedAt: "joinedAt" in p ? p.joinedAt : startedAt ?? undefined,
+          joinedAt: "joinedAt" in p ? p.joinedAt : (startedAt ?? undefined),
         };
-      }
+      },
     );
 
     // Parse dates
     let startedAtDate: Date | null = null;
     let endedAtDate: Date | null = null;
     try {
-      if (startedAt != null) startedAtDate = parseDateStrict(startedAt, "startedAt");
+      if (startedAt != null)
+        startedAtDate = parseDateStrict(startedAt, "startedAt");
       if (endedAt != null) endedAtDate = parseDateStrict(endedAt, "endedAt");
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -207,62 +230,91 @@ export async function POST(req: NextRequest) {
         },
       };
 
-      await prisma.$transaction(async (tx) => {
-        await tx.chatRoom.create({ data: createData });
-      });
+      await prisma.chatRoom.create({ data: createData });
 
-      await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
-      await recordCallHistory(validatedParticipants, roomId, startedAtDate, endedAtDate);
+      await awardConversationOutcome(
+        validatedParticipants,
+        startedAtDate,
+        endedAtDate,
+      );
+      await recordCallHistory(
+        validatedParticipants,
+        roomId,
+        startedAtDate,
+        endedAtDate,
+      );
 
-      return NextResponse.json({ ok: true, created: true, roomId }, { status: 201 });
+      return NextResponse.json(
+        { ok: true, created: true, roomId },
+        { status: 201 },
+      );
     } catch (createErr: unknown) {
-      if (createErr instanceof Prisma.PrismaClientKnownRequestError && createErr.code === "P2002") {
+      if (
+        createErr instanceof Prisma.PrismaClientKnownRequestError &&
+        createErr.code === "P2002"
+      ) {
         // Room exists → update and ensure participants exist
         try {
-          await prisma.$transaction(async (tx) => {
-            await tx.chatRoom.update({
-              where: { id: roomId },
-              data: {
-                status: finalState,
-                endedAt: endedAtDate ?? new Date(),
-              },
-            });
-
-            for (const p of validatedParticipants) {
-              const existing = await tx.participant.findFirst({
-                where: { userId: p.userId, roomId },
-                select: { id: true },
-              });
-
-              if (!existing) {
-                await tx.participant.create({
-                  data: {
-                    userId: p.userId,
-                    roomId,
-                    joinedAt: parseJoinedAt(p.joinedAt, startedAtDate ?? new Date()),
-                    leftAt: endedAtDate ?? undefined,
-                  },
-                });
-              } else {
-                await tx.participant.update({
-                  where: { id: existing.id },
-                  data: {
-                    leftAt: endedAtDate ?? undefined,
-                  },
-                });
-              }
-            }
+          await prisma.chatRoom.update({
+            where: { id: roomId },
+            data: {
+              status: finalState,
+              endedAt: endedAtDate ?? new Date(),
+            },
           });
 
-          await awardConversationOutcome(validatedParticipants, startedAtDate, endedAtDate);
-          await recordCallHistory(validatedParticipants, roomId, startedAtDate, endedAtDate);
+          for (const p of validatedParticipants) {
+            const existing = await prisma.participant.findFirst({
+              where: { userId: p.userId, roomId },
+              select: { id: true },
+            });
 
-          return NextResponse.json({ ok: true, updated: true, roomId }, { status: 200 });
+            if (!existing) {
+              await prisma.participant.create({
+                data: {
+                  userId: p.userId,
+                  roomId,
+                  joinedAt: parseJoinedAt(
+                    p.joinedAt,
+                    startedAtDate ?? new Date(),
+                  ),
+                  leftAt: endedAtDate ?? undefined,
+                },
+              });
+            } else {
+              await prisma.participant.update({
+                where: { id: existing.id },
+                data: {
+                  leftAt: endedAtDate ?? undefined,
+                },
+              });
+            }
+          }
+
+          await awardConversationOutcome(
+            validatedParticipants,
+            startedAtDate,
+            endedAtDate,
+          );
+          await recordCallHistory(
+            validatedParticipants,
+            roomId,
+            startedAtDate,
+            endedAtDate,
+          );
+
+          return NextResponse.json(
+            { ok: true, updated: true, roomId },
+            { status: 200 },
+          );
         } catch (updateErr) {
           console.error("finalize-room update transaction failed", updateErr);
           return NextResponse.json(
-            { error: "failed to update room or participants", detail: String(updateErr) },
-            { status: 500 }
+            {
+              error: "failed to update room or participants",
+              detail: String(updateErr),
+            },
+            { status: 500 },
           );
         }
       }
@@ -270,14 +322,14 @@ export async function POST(req: NextRequest) {
       console.error("finalize-room create failed", createErr);
       return NextResponse.json(
         { error: "failed to create room", detail: String(createErr) },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (err) {
     console.error("finalize-room unexpected error", err);
     return NextResponse.json(
       { error: "internal_server_error", detail: String(err) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
