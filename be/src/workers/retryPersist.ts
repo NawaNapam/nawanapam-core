@@ -269,7 +269,11 @@ async function maybeTrimStream() {
   }
 }
 
-async function main() {
+// Runs forever; safe to call either from this file's own entrypoint (a
+// standalone Render worker service, if one is ever provisioned) or embedded
+// in the same process as the socket server (`be/src/index.ts`) to avoid
+// paying for a second Render service.
+export async function startWorker() {
   await ensureGroup();
 
   // periodic health logs
@@ -296,13 +300,18 @@ async function main() {
   }
 }
 
-process.on("SIGINT", async () => {
-  console.log("[worker] shutting down...");
-  try { await redis.quit(); } catch {}
-  process.exit(0);
-});
+// Only self-start (and own process lifecycle/signals) when run directly as
+// its own process, e.g. `npm run worker:start`. When imported into another
+// process, the host owns startup/shutdown.
+if (require.main === module) {
+  process.on("SIGINT", async () => {
+    console.log("[worker] shutting down...");
+    try { await redis.quit(); } catch {}
+    process.exit(0);
+  });
 
-main().catch((e) => {
-  console.error("[worker] fatal on startup:", e);
-  process.exit(1);
-});
+  startWorker().catch((e) => {
+    console.error("[worker] fatal on startup:", e);
+    process.exit(1);
+  });
+}
