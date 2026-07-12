@@ -33,14 +33,19 @@ async function awardConversationOutcome(
           ? {
               conversationsStarted: { increment: 1 },
               conversationsCompleted: { increment: 1 },
-              xp: { increment: XP_AWARDS.CONVERSATION_COMPLETED },
             }
           : {
               conversationsStarted: { increment: 1 },
               skipCount: { increment: 1 },
-              xp: { increment: XP_AWARDS.REPEATED_SKIP },
             },
       });
+
+      // Clamped at 0 via raw SQL — a plain `increment` would let repeated
+      // skip penalties push xp negative (no floor exists on the column).
+      const xpDelta = completed
+        ? XP_AWARDS.CONVERSATION_COMPLETED
+        : XP_AWARDS.REPEATED_SKIP;
+      await prisma.$executeRaw`UPDATE "User" SET xp = GREATEST(xp + ${xpDelta}, 0) WHERE id = ${p.userId}`;
 
       await recomputeAndPersistScore(prisma, p.userId);
     } catch (err) {

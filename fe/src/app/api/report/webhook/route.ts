@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 const SHARED_SECRET = process.env.NEXT_SHARED_SECRET || "change_me_now";
@@ -50,16 +51,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const report = await prisma.report.create({
-      data: {
-        reporterId: reporter.id,
-        reportedUserId: call.peerId,
-        roomId,
-        reason,
-        message,
-        responseLink,
-      },
-    });
+    // roomId may reference a ChatRoom that isn't persisted yet (it's only
+    // written on finalize-room, at the end of the call), so fall back to an
+    // un-scoped report rather than failing the whole submission on the FK.
+    const createReport = (withRoomId: boolean) =>
+      prisma.report.create({
+        data: {
+          reporterId: reporter.id,
+          reportedUserId: call.peerId!,
+          roomId: withRoomId ? roomId : undefined,
+          reason,
+          message,
+          responseLink,
+        },
+      });
+
+    let report;
+    try {
+      report = await createReport(true);
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2003"
+      ) {
+        report = await createReport(false);
+      } else {
+        throw err;
+      }
+    }
 
     return NextResponse.json({ success: true, reportId: report.id }, { status: 201 });
   } catch (error) {
