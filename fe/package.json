@@ -13,6 +13,9 @@
     "dev:mobile": "npm run adb:reverse && npm run dev"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capgo/capacitor-social-login": "^8.3.36",
     "@edge-csrf/nextjs": "^2.5.2",
     "@hookform/resolvers": "^5.2.2",
     "@next-auth/prisma-adapter": "^1.0.7",
@@ -56,6 +59,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.24",
+    "google-auth-library": "^10.9.0",
     "input-otp": "^1.4.2",
     "isomorphic-dompurify": "^2.35.0",
     "lucide-react": "^0.544.0",
@@ -81,6 +85,8 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.4.1",
     "@eslint/eslintrc": "^3",
     "@prisma/config": "^7.0.0",
     "@tailwindcss/postcss": "^4",

@@ -44,3 +44,6 @@ next-env.d.ts
 src/generated/
 # Or more specifically:
 src/generated/prisma/
+
+
+/android

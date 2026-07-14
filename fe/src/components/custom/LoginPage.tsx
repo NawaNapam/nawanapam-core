@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
+import { signInWithGoogle } from "@/lib/nativeGoogleAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -49,6 +50,10 @@ export default function LoginPage() {
   };
 
   const handleProvider = (provider: "google" | "instagram") => {
+    if (provider === "google") {
+      signInWithGoogle("/dashboard");
+      return;
+    }
     signIn(provider, { callbackUrl: "/dashboard" });
   };
 

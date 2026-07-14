@@ -2,12 +2,17 @@ import GoogleProvider from "next-auth/providers/google";
 import InstagramProvider from "next-auth/providers/instagram";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { NextAuthOptions } from "next-auth";
 import { prisma } from "./prisma";
 import type { User as NextAuthUser } from "next-auth";
 import { googleEnv, nextEnv } from "@/envs/e";
 import { sendWelcomeEmail } from "./email";
+
+const googleIdTokenClient = googleEnv.CLIENT_ID
+  ? new OAuth2Client(googleEnv.CLIENT_ID)
+  : null;
 
 const providers = [];
 
@@ -70,6 +75,102 @@ providers.push(
     },
   }),
 );
+
+// Used only by the Capacitor Android app: it obtains a Google ID token via the
+// native Sign-In SDK (avoids Google's block on OAuth redirects inside WebViews)
+// and hands it here to be verified and turned into a normal session. The
+// website continues to use the redirect-based GoogleProvider above, untouched.
+if (googleIdTokenClient) {
+  providers.push(
+    CredentialsProvider({
+      id: "google-native",
+      name: "Google (Native)",
+      credentials: {
+        idToken: { label: "ID Token", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.idToken) {
+          return null;
+        }
+
+        let email: string | undefined;
+        let name: string | undefined | null;
+        let image: string | undefined | null;
+        let emailVerified: boolean | undefined;
+        let sub: string;
+
+        try {
+          const ticket = await googleIdTokenClient!.verifyIdToken({
+            idToken: credentials.idToken,
+            audience: googleEnv.CLIENT_ID,
+          });
+          const payload = ticket.getPayload();
+          if (!payload?.email || !payload.sub) {
+            return null;
+          }
+          email = payload.email;
+          name = payload.name;
+          image = payload.picture;
+          emailVerified = payload.email_verified;
+          sub = payload.sub;
+        } catch (error) {
+          console.error("[Auth] Failed to verify native Google ID token:", error);
+          return null;
+        }
+
+        let user = await prisma.user.findUnique({
+          where: { email },
+          include: { accounts: true },
+        });
+
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email,
+              name,
+              image,
+              emailVerified: emailVerified ? new Date() : null,
+            },
+            include: { accounts: true },
+          });
+
+          try {
+            await sendWelcomeEmail(user.email);
+          } catch (error) {
+            console.error(
+              `Failed to send welcome email to ${user.email}:`,
+              error,
+            );
+          }
+        }
+
+        const alreadyLinked = user.accounts.some(
+          (acc) => acc.provider === "google",
+        );
+        if (!alreadyLinked) {
+          await prisma.account.create({
+            data: {
+              userId: user.id,
+              type: "oauth",
+              provider: "google",
+              providerAccountId: sub,
+            },
+          });
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          username: user.username,
+          phoneNumber: user.phoneNumber || undefined,
+          gender: user.gender || undefined,
+        } as NextAuthUser;
+      },
+    }),
+  );
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),

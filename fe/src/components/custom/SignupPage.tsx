@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { User, Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
+import { signInWithGoogle } from "@/lib/nativeGoogleAuth";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -73,8 +74,13 @@ export default function SignupPage() {
     }
   };
 
-  const handleProvider = (provider: "google" | "instagram") =>
+  const handleProvider = (provider: "google" | "instagram") => {
+    if (provider === "google") {
+      signInWithGoogle("/dashboard");
+      return;
+    }
     signIn(provider, { callbackUrl: "/dashboard" });
+  };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 bg-background">
