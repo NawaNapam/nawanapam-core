@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the surface-dark color in src/app/globals.css so the system
+         status/nav bars never flash a mismatched light color at startup. -->
+    <color name="colorPrimary">#181d26</color>
+    <color name="colorPrimaryDark">#181d26</color>
+    <color name="colorAccent">#e9762b</color>
+    <color name="colorSurfaceDark">#181d26</color>
+    <!-- Matches manifest.json's background_color, so the native splash
+         matches the PWA install splash treatment. -->
+    <color name="splashBackground">#FFFFFF</color>
+</resources>
