@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { shareService } from "@/services/share";
 
 type Props = {
   streak: number | null;
@@ -29,13 +30,9 @@ export default function StreakMilestoneModal({ streak, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    // Feature-detect the Web Share API's file-sharing support (mobile browsers,
-    // notably where Instagram is installed as a share target).
-    setCanShareFile(
-      typeof navigator !== "undefined" &&
-        typeof navigator.share === "function" &&
-        typeof navigator.canShare === "function"
-    );
+    // Feature-detect file-sharing support (native Capacitor always can; mobile
+    // browsers only when the Web Share API's file support is present).
+    setCanShareFile(shareService.canShareFiles());
   }, [open]);
 
   async function handleShare() {
@@ -46,13 +43,12 @@ export default function StreakMilestoneModal({ streak, onClose }: Props) {
       const blob = await res.blob();
       const file = new File([blob], `nawa-napam-streak-${streak}.png`, { type: "image/png" });
 
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `${streak}-day streak on Nawa Napam`,
-          text: `${streak}-day streak on Nawa Napam! 🔥`,
-        });
-      } else {
+      const shared = await shareService.share({
+        files: [file],
+        title: `${streak}-day streak on Nawa Napam`,
+        text: `${streak}-day streak on Nawa Napam! 🔥`,
+      });
+      if (!shared) {
         handleDownload();
       }
     } catch {

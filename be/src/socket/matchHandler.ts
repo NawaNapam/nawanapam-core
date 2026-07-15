@@ -2,6 +2,7 @@ import type { Server, Socket } from "socket.io";
 import { redis, pub } from "../utils/redis/redisClient";
 import { scripts } from "../utils/redis/scripts";
 import { handleChatRoomJoin } from "./chatHandlers";
+import { sendPushNotification } from "../utils/pushClient";
 
 const STALE_MS = Number(process.env.STALE_MS || 30_000);
 const MATCH_TIMEOUT_MS = 15_000;
@@ -140,6 +141,16 @@ export async function handleMatchRequest(
         await pub.publish(
           "pubsub:presence",
           `matched|${rid}|${userId}|${peerId}`
+        );
+
+        // Best-effort: pull either side back to the app if they backgrounded
+        // it while waiting. Never awaited into the match path — push
+        // delivery must not add latency or failure modes to matchmaking.
+        void sendPushNotification(
+          [userId, peerId],
+          "Match found!",
+          "Someone's ready to chat — jump back in.",
+          { type: "match", roomId: rid }
         );
 
         return;

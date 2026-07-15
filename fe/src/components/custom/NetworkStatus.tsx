@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wifi, WifiOff } from "lucide-react";
-import { toast } from "sonner";
+import { WifiOff } from "lucide-react";
+import { toast } from "@/services/toast";
 
 export function NetworkStatus() {
   const [isOnline, setIsOnline] = useState(true);
@@ -17,7 +17,6 @@ export function NetworkStatus() {
       setIsOnline(true);
       setShowBanner(false);
       toast.success("You are back online!", {
-        icon: <Wifi className="h-4 w-4" />,
         description: "Your connection has been restored",
       });
     };
@@ -26,7 +25,6 @@ export function NetworkStatus() {
       setIsOnline(false);
       setShowBanner(true);
       toast.error("You are offline", {
-        icon: <WifiOff className="h-4 w-4" />,
         description: "Some features may not be available",
         duration: 10000,
       });
@@ -46,7 +44,7 @@ export function NetworkStatus() {
   return (
     <>
       {/* Fixed Banner at Top */}
-      <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top duration-300">
+      <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top duration-300 pt-(--status-bar-height)">
         <div className="bg-destructive text-destructive-foreground px-4 py-3 shadow-lg">
           <div className="container mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">

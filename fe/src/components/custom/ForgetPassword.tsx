@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, KeyRound, ArrowLeft, Loader2, Clock } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/services/toast";
 
 type Step = "email" | "otp" | "password";
 

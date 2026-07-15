@@ -46,4 +46,13 @@ src/generated/
 src/generated/prisma/
 
 
-/android
+# Android build outputs
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# IntelliJ/Android Studio
+android/.idea/
+*.iml
+android/app/google-services.json

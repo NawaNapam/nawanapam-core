@@ -20,8 +20,10 @@ import {
   SwitchCamera,
   CameraOff,
   Flag,
+  MoreVertical,
+  Play,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/services/toast";
 import { useSession } from "next-auth/react";
 
 import { useGetUser } from "@/hooks/use-getuser";
@@ -44,9 +46,28 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [localStreamReady, setLocalStreamReady] = useState(false);
   const [remoteStreamReady, setRemoteStreamReady] = useState(false);
+  // Tracks actual decoded-frame playback (not just stream attachment or the
+  // `playing` event) so the browser's own "tap to play" chrome — shown while
+  // autoplay is blocked, or while a live MediaStream track has attached but
+  // not yet decoded a real frame — never peeks through; our overlay covers
+  // the element until video is genuinely rendering.
+  const [remoteVideoPlaying, setRemoteVideoPlaying] = useState(false);
+  const checkRemoteVideoPlaying = (el: HTMLVideoElement) => {
+    const hasFrame = !el.paused && el.videoWidth > 0;
+    setRemoteVideoPlaying(hasFrame);
+
+    // Remote video starts muted so autoplay is guaranteed to succeed (no
+    // browser/webview ever blocks muted autoplay). Unmuting an already-playing
+    // element isn't subject to that gate, so this is safe to do the moment we
+    // can prove real frames are flowing — avoids ever needing a user gesture.
+    if (hasFrame && el.muted) {
+      el.muted = false;
+    }
+  };
   const [userInteracted, setUserInteracted] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
@@ -659,6 +680,16 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
   const showConnecting = status === "matched" && !connected;
   const isFullyConnected = status === "matched" && connected;
 
+  // The stream can be attached (remoteStreamReady) before the browser
+  // actually starts playback (autoplay is often blocked until a user
+  // gesture) — without this, the raw <video> shows its own native
+  // "tap to play" icon in that gap. Keeping our overlay up (with a nicer
+  // prompt) until playback truly starts covers that native chrome entirely.
+  const showTapToPlay =
+    isFullyConnected && remoteStreamReady && !remoteVideoPlaying;
+  const showRemoteWaiting =
+    showSearching || (isFullyConnected && !remoteStreamReady) || showTapToPlay;
+
   const DRAG_THRESHOLD = 6;
 
   const onSelfPointerDown = (e: React.PointerEvent) => {
@@ -802,7 +833,7 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
 
       {/* Header */}
       <header
-        className="absolute top-0 inset-x-0 px-4 py-3 md:px-6 md:py-4 flex items-center justify-between"
+        className="absolute top-0 inset-x-0 px-4 pb-3 md:px-6 md:pb-4 pt-[calc(0.75rem+var(--status-bar-height))] md:pt-[calc(1rem+var(--status-bar-height))] flex items-center justify-between"
         style={{ zIndex: 60 }}
       >
         <button
@@ -831,7 +862,7 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
                 ref={strangerVideoMobileRef}
                 autoPlay
                 playsInline
-                muted={false}
+                muted
                 webkit-playsinline="true"
                 x-webkit-airplay="allow"
                 className="w-full h-full object-cover bg-black"
@@ -842,16 +873,35 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
                     });
                   }
                 }}
+                onPlaying={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                onLoadedData={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                onTimeUpdate={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                onPause={() => setRemoteVideoPlaying(false)}
+                onWaiting={() => setRemoteVideoPlaying(false)}
+                onEmptied={() => setRemoteVideoPlaying(false)}
               />
 
-              {(showSearching || (isFullyConnected && !remoteStreamReady)) && (
+              {showRemoteWaiting && (
                 <div className="absolute inset-0 bg-surface-dark/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 pointer-events-none">
-                  <div className="loader"></div>
-                  <p className="text-xs text-white/90 font-medium text-center px-2">
-                    {showSearching
-                      ? "Finding someone for you..."
-                      : "Waiting for video..."}
-                  </p>
+                  {showTapToPlay ? (
+                    <>
+                      <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center animate-pulse">
+                        <Play size={22} className="text-white ml-0.5" fill="currentColor" />
+                      </div>
+                      <p className="text-xs text-white/90 font-medium text-center px-2">
+                        Tap to start video
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="loader"></div>
+                      <p className="text-xs text-white/90 font-medium text-center px-2">
+                        {showSearching
+                          ? "Finding someone for you..."
+                          : "Waiting for video..."}
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -915,39 +965,59 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
             {/* Main video container */}
             <div className="relative rounded-2xl overflow-hidden bg-black border border-white/10 shadow-2xl h-full w-full">
               {/* Show 'Finding someone for you...' in remote stream position (based on swap state) */}
-              {(showSearching || (isFullyConnected && !remoteStreamReady)) &&
-                !isStreamSwapped && (
-                  <div className="absolute inset-0 bg-surface-dark/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-20">
-                    <div className="loader"></div>
-                    <p className="text-sm text-white/90 font-medium">
-                      {showSearching
-                        ? "Finding someone for you..."
-                        : "Waiting for video..."}
-                    </p>
-                  </div>
-                )}
+              {showRemoteWaiting && !isStreamSwapped && (
+                <div className="absolute inset-0 bg-surface-dark/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-20">
+                  {showTapToPlay ? (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center animate-pulse">
+                        <Play size={26} className="text-white ml-1" fill="currentColor" />
+                      </div>
+                      <p className="text-sm text-white/90 font-medium">Tap to start video</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="loader"></div>
+                      <p className="text-sm text-white/90 font-medium">
+                        {showSearching
+                          ? "Finding someone for you..."
+                          : "Waiting for video..."}
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Show in PiP position when streams are swapped */}
-              {(showSearching || (isFullyConnected && !remoteStreamReady)) &&
-                isStreamSwapped && (
-                  <div
-                    className="absolute bg-surface-dark/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2"
-                    style={{
-                      bottom: "16px",
-                      right: "16px",
-                      width: "192px",
-                      height: "144px",
-                      zIndex: 35,
-                      pointerEvents: "none",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <div className="loader"></div>{" "}
-                    <p className="text-xs text-white/90 font-medium text-center px-2">
-                      {showSearching ? "Finding..." : "Waiting..."}
-                    </p>
-                  </div>
-                )}
+              {showRemoteWaiting && isStreamSwapped && (
+                <div
+                  className="absolute bg-surface-dark/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2"
+                  style={{
+                    bottom: "16px",
+                    right: "16px",
+                    width: "192px",
+                    height: "144px",
+                    zIndex: 35,
+                    pointerEvents: "none",
+                    borderRadius: "12px",
+                  }}
+                >
+                  {showTapToPlay ? (
+                    <>
+                      <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center animate-pulse">
+                        <Play size={16} className="text-white ml-0.5" fill="currentColor" />
+                      </div>
+                      <p className="text-xs text-white/90 font-medium text-center px-2">Tap to start</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="loader"></div>
+                      <p className="text-xs text-white/90 font-medium text-center px-2">
+                        {showSearching ? "Finding..." : "Waiting..."}
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Show Connecting in remote stream position (based on swap state) */}
               {showConnecting && !isStreamSwapped && (
@@ -1008,7 +1078,7 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
                   ref={strangerVideoDesktopRef}
                   autoPlay
                   playsInline
-                  muted={false}
+                  muted
                   className="w-full h-full object-cover bg-black"
                   style={{
                     display: "block",
@@ -1019,6 +1089,12 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
                   }}
                   x-webkit-airplay="allow"
                   webkit-playsinline="true"
+                  onPlaying={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                  onLoadedData={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                  onTimeUpdate={(e) => checkRemoteVideoPlaying(e.currentTarget)}
+                  onPause={() => setRemoteVideoPlaying(false)}
+                  onWaiting={() => setRemoteVideoPlaying(false)}
+                  onEmptied={() => setRemoteVideoPlaying(false)}
                 />
                 {/* Label when remote is in PiP */}
                 {isStreamSwapped && (
@@ -1273,13 +1349,68 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
 
       {/* Bottom Controls - Mobile */}
       <div
-        className="md:hidden fixed bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/95 to-transparent overflow-hidden pointer-events-none"
+        className="md:hidden fixed bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/95 to-transparent overflow-visible pointer-events-none"
         style={{
           zIndex: 100,
           paddingBottom: "16px",
           paddingTop: "24px",
         }}
       >
+        {/* More menu popover */}
+        {isMoreMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 pointer-events-auto"
+              style={{ zIndex: 101 }}
+              onClick={() => setIsMoreMenuOpen(false)}
+            />
+            <div
+              className="absolute bottom-full right-4 mb-3 w-52 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto"
+              style={{ zIndex: 102 }}
+            >
+              <button
+                onClick={() => {
+                  setIsMoreMenuOpen(false);
+                  setIsChatOpen(!isChatOpen);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors"
+              >
+                <MessageCircle size={18} />
+                <span className="text-sm">Chat</span>
+                {chatMessages.length > 0 && !isChatOpen && (
+                  <span className="ml-auto w-5 h-5 bg-white rounded-full text-[10px] font-bold flex items-center justify-center text-surface-dark">
+                    {chatMessages.filter((m) => !m.system && !m.self).length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMoreMenuOpen(false);
+                  switchCamera();
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors"
+              >
+                <SwitchCamera size={18} />
+                <span className="text-sm">Switch Camera</span>
+              </button>
+
+              {status === "matched" && peer?.userId && (
+                <button
+                  onClick={() => {
+                    setIsMoreMenuOpen(false);
+                    setIsReportOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 transition-colors"
+                >
+                  <Flag size={18} />
+                  <span className="text-sm">Report</span>
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
         <div className="flex justify-center items-center gap-3 px-4 pointer-events-auto">
           {/* Mute Button */}
           <button
@@ -1295,27 +1426,6 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
             ) : (
               <Mic size={22} className="text-white" />
             )}
-          </button>
-
-          {/* Chat Button */}
-          <button
-            onClick={() => setIsChatOpen(!isChatOpen)}
-            className="w-12 h-12 flex-shrink-0 rounded-full bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border border-white/10 flex items-center justify-center transition-all shadow-lg relative"
-          >
-            <MessageCircle size={20} className="text-white" />
-            {chatMessages.length > 0 && !isChatOpen && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full text-[9px] font-bold flex items-center justify-center text-surface-dark">
-                {chatMessages.filter((m) => !m.system && !m.self).length}
-              </span>
-            )}
-          </button>
-
-          {/* End Call Button */}
-          <button
-            onClick={handleEnd}
-            className="w-12 h-12 flex-shrink-0 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all shadow-lg"
-          >
-            <Power size={22} className="text-white" />
           </button>
 
           {/* Video Toggle Button */}
@@ -1334,23 +1444,13 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
             )}
           </button>
 
-          {/* Switch Camera */}
+          {/* End Call Button */}
           <button
-            onClick={switchCamera}
-            className="w-12 h-12 flex-shrink-0 rounded-full bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border border-white/10 flex items-center justify-center transition-all shadow-lg"
+            onClick={handleEnd}
+            className="w-14 h-14 flex-shrink-0 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all shadow-lg"
           >
-            <SwitchCamera size={20} className="text-white" />
+            <Power size={24} className="text-white" />
           </button>
-
-          {/* Report Button */}
-          {status === "matched" && peer?.userId && (
-            <button
-              onClick={() => setIsReportOpen(true)}
-              className="w-12 h-12 flex-shrink-0 rounded-full bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border border-white/10 flex items-center justify-center transition-all shadow-lg"
-            >
-              <Flag size={20} className="text-white" />
-            </button>
-          )}
 
           {/* Next/Start Button */}
           {status === "matched" ? (
@@ -1369,6 +1469,23 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
               <RotateCcw size={20} />
             </button>
           )}
+
+          {/* More Menu Toggle */}
+          <button
+            onClick={() => setIsMoreMenuOpen((v) => !v)}
+            className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center transition-all shadow-lg relative ${
+              isMoreMenuOpen
+                ? "bg-white/20 border border-white/30"
+                : "bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border border-white/10"
+            }`}
+          >
+            <MoreVertical size={20} className="text-white" />
+            {chatMessages.length > 0 && !isChatOpen && !isMoreMenuOpen && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full text-[9px] font-bold flex items-center justify-center text-surface-dark">
+                {chatMessages.filter((m) => !m.system && !m.self).length}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 

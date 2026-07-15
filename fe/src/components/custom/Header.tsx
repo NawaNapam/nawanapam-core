@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { platform } from "@/platform";
+import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/authStore";
 import {
   X,
@@ -55,6 +56,13 @@ export default function Header() {
 
   // PWA Install Detection
   useEffect(() => {
+    // Already running as the native Android app — never show the PWA install prompt.
+    if (platform.isNative) {
+      setIsStandalone(true);
+      setShowInstallPrompt(false);
+      return;
+    }
+
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as { standalone?: boolean }).standalone ||
@@ -73,7 +81,7 @@ export default function Header() {
     return () =>
       window.removeEventListener(
         "beforeinstallprompt",
-        handler as EventListener
+        handler as EventListener,
       );
   }, []);
 
@@ -84,7 +92,7 @@ export default function Header() {
 
     if (isIOS) {
       alert(
-        'To install on iOS:\n1. Tap the Share button\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm'
+        'To install on iOS:\n1. Tap the Share button\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to confirm',
       );
       return;
     }
@@ -98,7 +106,7 @@ export default function Header() {
       setDeferredPrompt(null);
     } else {
       alert(
-        'To install this app:\n• Chrome/Edge: Look for the install icon in the address bar\n• Or use the browser menu and select "Install app"'
+        'To install this app:\n• Chrome/Edge: Look for the install icon in the address bar\n• Or use the browser menu and select "Install app"',
       );
     }
   };
@@ -138,7 +146,7 @@ export default function Header() {
 
   if (isLoading) {
     return (
-      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-background border-b border-border flex items-center">
+      <header className="fixed top-0 inset-x-0 z-50 bg-background border-b border-border pt-(--status-bar-height)">
         <div className="container mx-auto h-16 flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <div className="size-9 bg-muted rounded-full animate-pulse" />
@@ -193,7 +201,7 @@ export default function Header() {
             </div>
             <div className="border-t border-border pt-2">
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => authService.logout("/")}
                 className="flex w-full items-center gap-3 px-5 py-3 text-destructive hover:bg-accent transition-colors"
               >
                 <LogOut size={18} />
@@ -204,7 +212,7 @@ export default function Header() {
         </div>
       )}
 
-      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-background border-b border-border flex items-center">
+      <header className="fixed top-0 inset-x-0 z-50 bg-background border-b border-border pt-(--status-bar-height)">
         <div className="container mx-auto h-16 flex items-center justify-between px-4 sm:px-6">
           {/* Logo + Brand Name */}
           <Link href="/" className="flex items-center gap-3">
@@ -300,12 +308,12 @@ export default function Header() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-background border-l border-border shadow-lg z-70 sm:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 h-full w-80 bg-background border-r border-border shadow-lg z-70 sm:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border pt-[calc(1rem+var(--status-bar-height))]">
           <h2 className="text-lg font-medium text-foreground">Menu</h2>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -385,7 +393,7 @@ export default function Header() {
           <button
             onClick={() => {
               setSidebarOpen(false);
-              signOut({ callbackUrl: "/" });
+              authService.logout("/");
             }}
             className="flex w-full items-center gap-4 px-4 py-3 text-destructive hover:bg-accent rounded-lg transition-colors"
           >

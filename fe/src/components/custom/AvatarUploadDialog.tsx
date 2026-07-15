@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Cropper, { Area } from "react-easy-crop";
-import { toast } from "sonner";
+import { toast } from "@/services/toast";
 import {
   Dialog,
   DialogContent,

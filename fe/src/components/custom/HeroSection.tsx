@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Video,
-  Zap,
-  Users,
-  Globe,
-  Shield,
-  EyeOff,
-} from "lucide-react";
+import { Video, Zap, Users, Globe, Shield, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import HowStreaksWork from "@/components/custom/HowStreaksWork";
 
@@ -108,8 +101,8 @@ export default function HeroSection() {
                 Why choose NawaNapam?
               </h2>
               <p className="text-white/80 text-lg">
-                Rooted in culture, built for the world — anonymous, instant,
-                and truly human.
+                Rooted in culture, built for the world — anonymous, instant, and
+                truly human.
               </p>
             </div>
 
@@ -121,9 +114,7 @@ export default function HeroSection() {
                 >
                   <f.icon size={24} className="text-signature-coral" />
                   <h3 className="font-medium text-foreground">{f.title}</h3>
-                  <p className="text-sm text-body leading-relaxed">
-                    {f.desc}
-                  </p>
+                  <p className="text-sm text-body leading-relaxed">{f.desc}</p>
                 </article>
               ))}
             </div>

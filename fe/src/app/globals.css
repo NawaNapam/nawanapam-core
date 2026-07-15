@@ -84,6 +84,11 @@ body {
 }
 
 :root {
+  /* Set at runtime on native Android (edge-to-edge on API 35+ means the
+     StatusBar plugin's overlaysWebView/backgroundColor no longer apply — see
+     NativeStatusBar.tsx). Stays 0px on web. */
+  --status-bar-height: 0px;
+
   --radius: 10px;
   --radius-xs: 2px;
   --radius-pill: 9999px;

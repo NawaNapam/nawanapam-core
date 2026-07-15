@@ -1,5 +1,6 @@
 import type { Server, Socket } from "socket.io";
 import { redis } from "../utils/redis/redisClient";
+import { sendPushNotification } from "../utils/pushClient";
 
 /**
  * When a user emits "room:join", they're telling us they want to join a chat room.
@@ -90,6 +91,24 @@ export async function handleChatSend(
   io.to(targetRoom).emit("chat:message", message);
 
   console.log(`[chatHandler] Broadcasted message to ALL in room ${targetRoom} (including sender)`);
+
+  // Best-effort: push the peer in case they backgrounded the app mid-call.
+  const roomSocketIds = io.sockets.adapter.rooms.get(targetRoom);
+  if (roomSocketIds) {
+    const peerUserIds = [...roomSocketIds]
+      .filter((id) => id !== socket.id)
+      .map((id) => io.sockets.sockets.get(id)?.data.userId)
+      .filter((id): id is string => Boolean(id));
+
+    if (peerUserIds.length > 0) {
+      void sendPushNotification(
+        peerUserIds,
+        `${username} sent a message`,
+        text.trim(),
+        { type: "message", roomId: targetRoom }
+      );
+    }
+  }
 }
 
 /**

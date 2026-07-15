@@ -361,10 +361,13 @@ export function useWebRTC({
       if (ignoreOfferRef.current) return;
 
       try {
-        if (offerCollision && politeRef.current) {
-          await pcNow.setLocalDescription({ type: "rollback" });
-        }
-
+        // No manual rollback here: `makingOfferRef` flips true before
+        // `setLocalDescription` actually resolves, so `signalingState` can
+        // still read "stable" during a real collision — calling
+        // `setLocalDescription({ type: "rollback" })` in that window throws
+        // "wrong signalingState: stable". `setRemoteDescription(offer)`
+        // performs an implicit rollback per spec when we're mid-offer, so no
+        // manual rollback is needed (or safe) here.
         await pcNow.setRemoteDescription(
           new RTCSessionDescription(payload.sdp)
         );

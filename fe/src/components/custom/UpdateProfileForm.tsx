@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Pencil, ArrowLeft, Check, Globe } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
+import { toast } from "@/services/toast";
 import { useSession } from "next-auth/react";
 import { useGetUser } from "@/hooks/use-getuser";
 import AvatarUploadDialog from "@/components/custom/AvatarUploadDialog";
@@ -171,22 +171,24 @@ export default function ProfileSettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 inset-x-0 z-50 h-16 bg-background border-b border-border flex items-center justify-between px-4 sm:px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 text-body hover:text-foreground text-sm font-medium transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span className="hidden sm:inline">Dashboard</span>
-        </Link>
-        <div className="hidden items-center gap-2 text-muted-foreground text-xs font-medium sm:flex">
-          <Globe size={14} />
-          <span className="font-mono tracking-wider">{currentTime}</span>
+      <header className="fixed top-0 inset-x-0 z-50 bg-background border-b border-border pt-(--status-bar-height)">
+        <div className="h-16 flex items-center justify-between px-4 sm:px-6">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 text-body hover:text-foreground text-sm font-medium transition-colors"
+          >
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline">Dashboard</span>
+          </Link>
+          <div className="hidden items-center gap-2 text-muted-foreground text-xs font-medium sm:flex">
+            <Globe size={14} />
+            <span className="font-mono tracking-wider">{currentTime}</span>
+          </div>
         </div>
       </header>
 
       {/* Main */}
-      <main className="pt-20 pb-10 px-4 sm:px-6 max-w-2xl lg:max-w-5xl mx-auto">
+      <main className="pt-[calc(5rem+var(--status-bar-height))] pb-10 px-4 sm:px-6 max-w-2xl lg:max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-medium tracking-tight text-foreground">
             Profile Settings

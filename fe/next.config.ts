@@ -84,6 +84,12 @@ const nextConfig: NextConfig = {
   // SECURITY HEADERS (kept from your config)
   //----------------------------------------------------------------------
   async headers() {
+    // Skip in dev: `upgrade-insecure-requests` + HSTS force https for every
+    // subresource, which breaks Capacitor live-reload served over plain
+    // http://<lan-ip>:3000 (CSS/JS silently fail to load).
+    if (process.env.NODE_ENV !== "production") {
+      return [];
+    }
     return [
       {
         source: "/(.*)",

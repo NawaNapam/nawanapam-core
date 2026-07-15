@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
+import { createZustandStorage } from "@/services/storage";
+import { AUTH_STORAGE_KEY } from "@/platform/constants";
 
 export interface User {
   id?: string;
@@ -20,6 +22,8 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   updateUser: (updates: Partial<User>) => void;
 }
+
+type PersistedAuthState = Pick<AuthState, "user" | "isAuthenticated">;
 
 export const useAuthStore = create<AuthState>()(
   subscribeWithSelector(
@@ -53,7 +57,8 @@ export const useAuthStore = create<AuthState>()(
         },
       }),
       {
-        name: "nawa-napam-auth",
+        name: AUTH_STORAGE_KEY,
+        storage: createZustandStorage<PersistedAuthState>(),
         partialize: (state) => ({
           user: state.user,
           isAuthenticated: state.isAuthenticated,
