@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
   appName: "Nawa Napam",
   webDir: "www",
   server: {
-    url: "http://10.73.23.193:3000",
+    url: "https://www.nawanapam.com",
     cleartext: true,
   },
   plugins: {
@@ -30,7 +30,7 @@ const config: CapacitorConfig = {
     // while Next.js loads/hydrates. `HomeGate` calls SplashScreen.hide()
     // once it knows whether to route to /login or /dashboard.
     SplashScreen: {
-      launchAutoHide: true,
+      launchAutoHide: false,
       showSpinner: false,
     },
   },
