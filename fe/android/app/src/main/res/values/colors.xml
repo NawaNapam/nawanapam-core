@@ -8,5 +8,8 @@
     <color name="colorSurfaceDark">#181d26</color>
     <!-- Matches manifest.json's background_color, so the native splash
          matches the PWA install splash treatment. -->
-    <color name="splashBackground">#FFFFFF</color>
+    <!-- Brand dark-forest-green — matches the logo badge background so the
+         splash feels like a seamless full-screen brand moment. -->
+    <color name="splashBackground">#27442E</color>
+    <color name="splashIconBackground">#27442E</color>
 </resources>

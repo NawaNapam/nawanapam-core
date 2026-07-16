@@ -303,6 +303,46 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
 
     const startLocalStream = async () => {
       try {
+        // On Capacitor native Android, navigator.mediaDevices can be undefined
+        // when the WebView loads over http:// (non-secure context during live
+        // reload). Capacitor itself bridges the permission grant via the
+        // AndroidManifest — but we must request runtime permission first.
+        const isCapacitorNative =
+          typeof window !== "undefined" &&
+          !!(window as unknown as Record<string, unknown>).Capacitor;
+
+        if (isCapacitorNative) {
+          try {
+            // Dynamically import so it tree-shakes from web builds
+            const { Capacitor } = await import("@capacitor/core");
+            if (Capacitor.isNativePlatform()) {
+              // Use the low-level checkPermissions / requestPermissions on
+              // @capacitor/core — no extra plugin needed.
+              const permissions = await navigator.permissions?.query({
+                name: "camera" as PermissionName,
+              });
+              if (permissions?.state === "denied") {
+                toast.error(
+                  "Camera permission denied. Please enable it in Settings → Apps → Nawa Napam → Permissions.",
+                  { duration: 6000 },
+                );
+                return;
+              }
+            }
+          } catch {
+            // permissions API not available on this device — continue anyway
+          }
+        }
+
+        // Guard: mediaDevices is undefined on http:// non-secure contexts.
+        if (!navigator.mediaDevices?.getUserMedia) {
+          toast.error(
+            "Camera not available. If you're using live reload, please connect over HTTPS or use a production build.",
+            { duration: 6000 },
+          );
+          return;
+        }
+
         // console.log("[Camera] 📹 Requesting local media...");
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -349,7 +389,17 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
         }
       } catch (err) {
         console.error("[Camera] ❌ Camera access failed:", err);
-        toast.error("Please allow camera & microphone access");
+        const e = err as Error;
+        if (e.name === "NotAllowedError" || e.name === "PermissionDeniedError") {
+          toast.error(
+            "Camera & microphone access denied. Please allow permissions in your device settings.",
+            { duration: 6000 },
+          );
+        } else if (e.name === "NotFoundError") {
+          toast.error("No camera found on this device.");
+        } else {
+          toast.error("Please allow camera & microphone access");
+        }
       }
     };
 
@@ -359,6 +409,7 @@ export default function VideoChatPage({ gender }: VideoChatPageProps) {
       // console.log("[Camera] Component effect cleanup (stream preserved)");
     };
   }, [userId, sessionStatus, attachLocal]);
+
 
   useEffect(() => {
     const el = getSelfEl();

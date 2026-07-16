@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-screen splash background: brand-green fill with the logo centered.
+     Used as windowBackground in AppTheme.NoActionBar so the first frame of
+     the WebView is brand-green rather than a flash of white. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+
+    <!-- Brand dark-forest-green fill -->
+    <item>
+        <color android:color="@color/splashBackground" />
+    </item>
+
+    <!-- Centered NawaNapam logo badge (covers ~55 % of screen width) -->
+    <item
+        android:gravity="center"
+        android:width="260dp"
+        android:height="260dp">
+        <bitmap
+            android:src="@drawable/splash"
+            android:gravity="center"
+            android:scaleType="fitCenter" />
+    </item>
+
+</layer-list>

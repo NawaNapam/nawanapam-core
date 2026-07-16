@@ -51,10 +51,6 @@ function computePlatformInfo(): PlatformInfo {
   };
 }
 
-let cached: PlatformInfo | null = null;
-
-/** Computed once per session (the underlying runtime never changes mid-session). */
 export function getPlatformInfo(): PlatformInfo {
-  if (!cached) cached = computePlatformInfo();
-  return cached;
+  return computePlatformInfo();
 }

@@ -1,12 +1,13 @@
 import Private from "@/components/auth/Private";
-import CallHistoryPage from "@/components/custom/CallHistory";
+import { DynamicCallHistoryGate } from "@/components/native/DynamicGates";
 
-const Page = () => {
+export default function Page() {
   return (
     <Private>
-      <CallHistoryPage />
+      <DynamicCallHistoryGate />
     </Private>
   );
-};
+}
 
-export default Page;
+
+

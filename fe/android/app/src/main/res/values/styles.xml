@@ -12,17 +12,19 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@null</item>
+        <!-- Keep brand-green visible while WebView loads — prevents white flash -->
+        <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
 
-    <!-- On Android 12+ (this app's minSdk range) Capacitor's splash plugin hands off to
-         androidx.core.splashscreen, which reads these specific theme attributes rather than
-         a plain android:background — using android:background here made the OS fall back to
-         a generic derived splash instead of showing @drawable/splash at all. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <!-- Full-screen brand green — matches the logo badge colour -->
         <item name="windowSplashScreenBackground">@color/splashBackground</item>
+        <!-- The logo itself (icon-safe, rounded-square badge) -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
+        <!-- Android 12+: make the icon background also brand-green so there's
+             no white circle visible behind the logo badge shape -->
+        <item name="windowSplashScreenIconBackgroundColor">@color/splashIconBackground</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

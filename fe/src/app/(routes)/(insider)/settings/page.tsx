@@ -1,11 +1,14 @@
-import ProfileSettingsPage from "@/components/custom/UpdateProfileForm";
-import React from "react";
 
-const Page = () => {
+import Private from "@/components/auth/Private";
+import { DynamicSettingsGate } from "@/components/native/DynamicGates";
+
+export default function Page() {
   return (
-      <div> 
-        <ProfileSettingsPage />
-     </div>)
-};
+    <Private>
+      <DynamicSettingsGate />
+    </Private>
+  );
+}
 
-export default Page;
+
+

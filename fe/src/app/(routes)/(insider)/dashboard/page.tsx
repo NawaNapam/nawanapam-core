@@ -1,13 +1,14 @@
+// "use client"
 import Private from "@/components/auth/Private";
-import Dashboard from "@/components/custom/Dashboard";
-import React from "react";
+import { DynamicDashboardGate } from "@/components/native/DynamicGates";
 
-const Page = () => {
+export default function Page() {
   return (
     <Private>
-      <Dashboard />
+      <DynamicDashboardGate />
     </Private>
   );
-};
+}
 
-export default Page;
+
+

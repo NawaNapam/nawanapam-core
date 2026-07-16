@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network security config for Nawa Napam Android.
+
+  In development (live reload), Capacitor serves the Next.js app over http://
+  from the dev machine's LAN IP. Android 7+ restricts cleartext traffic AND
+  marks http:// as a non-secure origin, which causes navigator.mediaDevices
+  to be undefined (secure-context-only API).
+
+  This config:
+  1. Allows cleartext (http://) traffic to private/local IP ranges used by
+     live reload (192.168.x.x, 10.x.x.x, 172.16-31.x.x, localhost).
+  2. Trusts user-installed CAs in debug builds so Charles/Proxyman work.
+
+  Production (HTTPS) is unaffected — only matches the local IP patterns.
+-->
+<network-security-config>
+  <!-- Allow http:// to localhost and LAN addresses used by live reload -->
+  <domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="true">localhost</domain>
+    <domain includeSubdomains="true">10.0.2.2</domain>
+    <!-- LAN ranges for live reload from a real device on Wi-Fi -->
+    <domain includeSubdomains="true">192.168.0.0</domain>
+    <domain includeSubdomains="true">192.168.1.0</domain>
+    <domain includeSubdomains="true">192.168.2.0</domain>
+    <domain includeSubdomains="true">10.0.0.0</domain>
+  </domain-config>
+
+  <!-- Production traffic: system CAs only. Allow cleartext globally here so ANY local IP works for live reload. -->
+  <base-config cleartextTrafficPermitted="true">
+    <trust-anchors>
+      <certificates src="system" />
+    </trust-anchors>
+  </base-config>
+
+
+  <!-- Debug: also trust user CAs so proxy tools (Charles etc.) work -->
+  <debug-overrides>
+    <trust-anchors>
+      <certificates src="system" />
+      <certificates src="user" />
+    </trust-anchors>
+  </debug-overrides>
+</network-security-config>

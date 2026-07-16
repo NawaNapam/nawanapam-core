@@ -1,5 +1,7 @@
 import { signIn } from "next-auth/react";
 import { BaseAuth } from "./BaseAuth";
+import { storageService } from "@/services/storage";
+import { LOGOUT_FLAG_KEY } from "@/platform/constants";
 
 let socialLoginInitialized = false;
 
@@ -38,6 +40,10 @@ export class NativeAuth extends BaseAuth {
       throw new Error("Google sign-in did not return an ID token");
     }
 
+    // Clear any stale logout flag so the next cold start routes to dashboard
+    await storageService.remove(LOGOUT_FLAG_KEY);
+
     await signIn("google-native", { idToken, callbackUrl, redirect: true });
   }
 }
+
