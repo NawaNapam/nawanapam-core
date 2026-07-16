@@ -525,7 +525,7 @@ export default function NativeSettings() {
             id="settings-privacy"
             icon={Shield}
             label="Privacy & Safety"
-            onPress={() => {}}
+            onPress={() => router.push("/privacy-policy")}
           />
           <SettingsRow
             id="settings-edit-profile"
