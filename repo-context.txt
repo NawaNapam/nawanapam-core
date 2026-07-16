@@ -1,7 +1,1256 @@
-──────────────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────
 Using gpt-4o model with API key from environment.
 Aider v0.86.2
 Main model: gpt-4o with diff edit format
 Weak model: gpt-4o-mini
-Git repo: .git with 446 files
+Git repo: .git with 465 files
 Repo-map: using 4096 tokens, auto refresh
+Here are summaries of some files present in my git repository.
+Do not propose changes to these files, treat them as *read-only*.
+If you need to edit any of these files, ask me to *add them to the 
+chat* first.
+
+be/scripts/reverse-port.js:
+⋮
+│const reversePort = (port = 8080) => {
+│  try {
+│    console.log(`Setting up ADB reverse for backend port 
+${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: 
+"inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} 
+successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: 
+${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+be/src/app.ts:
+⋮
+│export async function initBE() {
+│  app.use(express.json());
+│  app.use(
+│    cors({
+│      origin: ["http://localhost:3000", "https://nawanapam.com"],
+│    })
+│  );
+│
+│  const io = new Server(httpServer, { cors: { origin: "*" } });
+│
+│  async function start() {
+│    await loadScripts();
+│
+│    registerConnectionHandlers(io);
+│
+│    httpServer.listen(PORT, () =>
+│      console.log("signaling server running on", PORT)
+│    );
+⋮
+
+be/src/services/socket.service.ts:
+⋮
+│export class SocketService {
+│  private static instance: SocketService | null = null;
+│  private _io: SocketIOServer | null = null;
+│
+│  private constructor(server: httpServer) {
+│    this._io = new SocketIOServer(server);
+│  }
+│
+│  // for single ton pattern
+│  public static getInstance(server?: httpServer): SocketService {
+⋮
+
+be/src/socket/authHandler.ts:
+⋮
+│export async function handleAuth(socket: Socket, payload: any) {
+│  const { userId, username, gender } = payload || {};
+│  if (!userId) {
+│    socket.emit("auth:error", "userId required");
+│    return;
+│  }
+│
+│  socket.data.userId = userId;
+│  socket.data.username = username ?? "";
+│  socket.data.gender = gender ?? ""; // Store user's actual gender
+│
+⋮
+
+be/src/socket/connection.ts:
+⋮
+│type RoomMeta = {
+│  ended?: boolean;
+⋮
+│export function registerConnectionHandlers(io: Server) {
+│  io.on("connection", (socket: Socket) => {
+│    console.log("✅ Socket connected:", socket.id);
+│
+│    registerRtcHandlers(io, socket);
+│
+│    // --- auth/heartbeat/match ---
+│    socket.on("auth", (payload) => handleAuth(socket, payload));
+│    socket.on("heartbeat", (payload) => handleHeartbeat(socket, 
+payload));
+│    socket.on("match:request", (payload) =>
+⋮
+
+be/src/socket/finalizeHandler.ts:
+⋮
+│export async function handleEndRoom(
+│  io: Server,
+│  socket: Socket,
+│  payload: any
+⋮
+
+be/src/socket/heartbeatHandler.ts:
+⋮
+│export async function handleHeartbeat(socket: Socket, payload: 
+any) {
+│  const userId = socket.data.userId;
+│  if (!userId) return;
+│
+│  const now = Date.now();
+│  await redis.hset(`user:${userId}`, { lastSeen: String(now), 
+socketId: socket.id });
+│
+│//   const lat = payload?.lat;
+│//   const lon = payload?.lon;
+│//   if (lat && lon) {
+⋮
+
+be/src/socket/matchHandler.ts:
+⋮
+│export async function handleMatchRequest(
+│  io: Server,
+│  socket: Socket,
+│  payload: { pref?: string }
+⋮
+│function getPoolKey(gender: string): string {
+│  const normalized = gender?.toLowerCase();
+│  if (normalized === "male") return "available:male";
+│  if (normalized === "female") return "available:female";
+│  return "available:random";
+⋮
+
+be/src/socket/rtchandler.ts:
+⋮
+│type RoomState = {
+│  members: Set<string>; // socket.id set
+│  users: Set<string>; // userId set
+│  offererUserId?: string; // chosen once both join
+⋮
+
+be/src/utils/nmScoreClient.ts:
+⋮
+│export type NMSessionResult = {
+│  ok: boolean;
+│  nmScore: number;
+│  nmTier: string;
+│  xp: number;
+│  currentStreak: number;
+│  longestStreak: number;
+│  newAchievements: { key: string; name: string; description: 
+string }[];
+│  countedToday: boolean;
+│  milestoneStreak: number | null;
+⋮
+│export async function registerNMSession(userId: string): 
+Promise<NMSessionResult | null> {
+│  try {
+│    const controller = new AbortController();
+│    const t = setTimeout(() => controller.abort(), 
+HTTP_TIMEOUT_MS);
+│    const res = await fetch(`${NEXT_ORIGIN}/api/nm-score/session`,
+{
+│      method: "POST",
+│      headers: {
+│        "content-type": "application/json",
+│        "x-shared-secret": NEXT_SHARED_SECRET,
+│      },
+⋮
+
+be/src/utils/pushClient.ts:
+⋮
+│export async function sendPushNotification(
+│  userIds: string[],
+│  title: string,
+│  body: string,
+│  data?: Record<string, string>
+⋮
+
+be/src/utils/redis/redisClient.ts:
+⋮
+│export async function safeEvalSha(sha: string, ...args: unknown[])
+{
+│  return redis.evalsha(sha, 0, ...(args as string[]));
+⋮
+
+be/src/utils/redis/scripts.ts:
+⋮
+│export async function loadScripts() {
+│  const matchLua = fs.readFileSync(path.join(scriptsDir, 
+"match_and_claim.lua"), "utf8");
+│  const finalizeLua = fs.readFileSync(path.join(scriptsDir, 
+"finalize_room.lua"), "utf8");
+│  scripts.matchSha = String(await redis.script("LOAD", matchLua));
+│  scripts.finalizeSha = String(await redis.script("LOAD", 
+finalizeLua));
+│  console.log("Redis scripts loaded", scripts);
+⋮
+
+fe/android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleI
+nstrumentedTest.java:
+⋮
+│@RunWith(AndroidJUnit4.class)
+│public class ExampleInstrumentedTest {
+│
+│    @Test
+│    public void useAppContext() throws Exception {
+⋮
+
+fe/android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest
+.java:
+⋮
+│public class ExampleUnitTest {
+│
+│    @Test
+│    public void addition_isCorrect() throws Exception {
+│        assertEquals(4, 2 + 2);
+│    }
+⋮
+
+fe/android/gradle.properties:
+⋮
+│android.useAndroidX=true
+
+fe/middleware.ts:
+⋮
+│async function handleAdminRoutes(req: NextRequest) {
+│  const isAdminLoginPage = req.nextUrl.pathname === 
+"/console/login";
+│  const isAdminRoute = 
+req.nextUrl.pathname.startsWith("/console");
+│
+│  // Check admin session
+│  const adminSession = req.cookies.get("admin_session")?.value;
+│
+│  // If on admin route (not login) without session, redirect to 
+login
+│  if (isAdminRoute && !isAdminLoginPage && !adminSession) {
+│    return NextResponse.redirect(new URL("/console/login", 
+req.url));
+⋮
+
+fe/next.config.ts:
+⋮
+│const nextConfig: NextConfig = {
+│  env: {
+│    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 
+"http://localhost:3000",
+│  },
+│  eslint: {
+│    dirs: ["src", "pages", "components", "lib", "app"],
+│    ignoreDuringBuilds: false,
+│  },
+│  typescript: {
+│    ignoreBuildErrors: false,
+⋮
+│  async rewrites() {
+│    return [
+│      {
+│        source: "/",
+│        has: [
+│          {
+│            type: "host",
+│            value: "admin.nawanapam.com",
+│          },
+│        ],
+⋮
+│  async redirects() {
+│    return [
+│      // Block /console on main domains
+│      {
+│        source: "/console/:path*",
+│        has: [{ type: "host", value: "nawanapam.com" }],
+│        destination: "/404",
+│        permanent: false,
+│      },
+│      {
+⋮
+
+fe/public/workbox-4754cb34.js:
+│define(["exports"],function(t){"use 
+strict";try{self["workbox:core:6.5.4"]&&_()}catch(t){}const e=(
+
+fe/scripts/reverse-be.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: 
+"inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} 
+successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: 
+${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/scripts/reverse-fe.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: 
+"inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} 
+successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: 
+${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/scripts/reverse-port.js:
+⋮
+│const reversePort = (port) => {
+│  try {
+│    console.log(`Setting up ADB reverse for port ${port}...`);
+│    execSync(`adb reverse tcp:${port} tcp:${port}`, { stdio: 
+"inherit" });
+│    console.log(`✓ ADB reverse tcp:${port} tcp:${port} 
+successful!`);
+│  } catch (error) {
+│    console.error(`✗ Failed to set up ADB reverse: 
+${error.message}`);
+│    console.error("Make sure:");
+│    console.error("1. ADB is installed and in your PATH");
+│    console.error("2. USB debugging is enabled on your device");
+⋮
+
+fe/src/app/(routes)/(auth)/forget-pass/page.tsx:
+⋮
+│export default function ForgotPasswordPage() {
+│  return (
+│    <Public>
+│      <ForgetPassword />
+│    </Public>
+│  );
+⋮
+
+fe/src/app/(routes)/(insider)/chat/page.tsx:
+⋮
+│export type GenderFilter = "random" | "male" | "female";
+│
+│export default async function Chat({
+│  searchParams,
+⋮
+
+fe/src/app/Provider.tsx:
+⋮
+│type Props = { children: ReactNode; session?: Session | null };
+│
+⋮
+
+fe/src/app/api/(management)/deleteuser/route.ts:
+⋮
+│export async function DELETE(_req: Request) {
+│  return NextResponse.json(
+│    { message: "User deleted successfully", status: "yet to 
+implement" },
+│    { status: 200 }
+│  );
+⋮
+
+fe/src/app/api/(management)/updateuser/route.ts:
+⋮
+│async function handleUpdateUser(req: Request) {
+│  try {
+│    // Apply rate limiting
+│    const identifier = getClientIdentifier(req);
+│    const { success, limit, remaining, reset } =
+│      await apiRateLimiter.limit(identifier);
+│
+│    if (!success) {
+│      return NextResponse.json(
+│        { error: "Too Many Requests" },
+⋮
+│export async function PUT(req: Request) {
+│  return handleUpdateUser(req);
+⋮
+
+fe/src/app/api/admin/manage/reports/[reportId]/route.ts:
+⋮
+│export async function PATCH(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ reportId: string }> },
+⋮
+
+fe/src/app/api/admin/manage/users/[userId]/delete/route.ts:
+⋮
+│export async function DELETE(
+│  request: NextRequest,
+│  { params }: { params: Promise<{ userId: string }> },
+⋮
+
+fe/src/app/api/push/register-token/route.ts:
+⋮
+│export async function DELETE(req: NextRequest) {
+│  const session = await getServerSession(authOptions);
+│  if (!session?.user?.id) {
+│    return NextResponse.json({ error: "Unauthorized" }, { status: 
+401 });
+│  }
+│
+│  const body = await req.json();
+│  const token = body?.token;
+│  if (!token || typeof token !== "string") {
+│    return NextResponse.json({ error: "token is required" }, { 
+status: 400 });
+⋮
+
+fe/src/app/console/analytics/page.tsx:
+⋮
+│interface AnalyticsData {
+│  timeRange: { days: number; startDate: string; endDate: string };
+│  userGrowth: Array<{ date: string; count: number }>;
+│  roomActivity: Array<{ date: string; count: number }>;
+│  reportsOverTime: Array<{ date: string; count: number }>;
+│  distributions: {
+│    userTypes: Array<{ type: string; count: number }>;
+│    roomStatus: Array<{ status: string; count: number }>;
+│    gender: Array<{ gender: string; count: number }>;
+│    reportStatus: Array<{ status: string; count: number }>;
+⋮
+
+fe/src/app/console/layout.tsx:
+⋮
+│export default function AdminLayout({
+│  children,
+⋮
+
+fe/src/app/console/moderation/page.tsx:
+⋮
+│interface ModerationLog {
+│  id: string;
+│  action: "BAN" | "WARN" | "MUTE";
+│  reason: string | null;
+│  createdAt: string;
+│  performedBy: string;
+│  user: {
+│    id: string;
+│    email: string;
+│    username: string | null;
+⋮
+│              <Button
+│                variant="outline"
+│                size="sm"
+│                onClick={() => setPage((p) => Math.max(1, p - 1))}
+│                disabled={page === 1}
+⋮
+
+fe/src/app/console/reports/page.tsx:
+⋮
+│              <Button
+│                variant="outline"
+│                size="sm"
+│                onClick={() => setPage((p) => Math.max(1, p - 1))}
+│                disabled={page === 1}
+⋮
+
+fe/src/app/console/rooms/page.tsx:
+⋮
+│interface Room {
+│  id: string;
+│  status: "WAITING" | "ACTIVE" | "ENDED";
+│  topicTags: string[];
+│  createdAt: string;
+│  endedAt: string | null;
+│  lastMessageAt: string | null;
+│  participants: Participant[];
+│  reports: Array<{ id: string; status: string }>;
+│  _count: {
+⋮
+
+fe/src/app/console/settings/page.tsx:
+⋮
+│interface AdminUser {
+│  id: string;
+│  email: string;
+│  name: string | null;
+│  role: string;
+│  isActive: boolean;
+│  lastLoginAt: string | null;
+│  createdAt: string;
+⋮
+
+fe/src/app/layout.tsx:
+⋮
+│export default function RootLayout({
+│  children,
+⋮
+
+fe/src/app/page.tsx:
+⋮
+│export default function HomePage() {
+│  return (
+│    <div className="w-full h-screen">
+│      <Landing />
+│    </div>
+│  );
+⋮
+
+fe/src/components/custom/AvatarUploadDialog.tsx:
+⋮
+│interface AvatarUploadDialogProps {
+│  open: boolean;
+│  imageSrc: string;
+│  onClose: () => void;
+│  onUploaded: (url: string) => void;
+⋮
+
+fe/src/components/custom/CallHistory.tsx:
+⋮
+│type CallHistoryEntry = {
+│  id: string;
+│  roomId: string;
+│  peerId: string | null;
+│  peerUsername: string | null;
+│  startedAt: string | null;
+│  endedAt: string | null;
+│  durationSec: number | null;
+│  createdAt: string;
+⋮
+
+fe/src/components/custom/Dashboard.tsx:
+⋮
+│type MatchPref = "RANDOM" | "MALE" | "FEMALE";
+│
+⋮
+
+fe/src/components/custom/Footer.tsx:
+⋮
+│export default function Footer() {
+│  const [modalOpen, setModalOpen] = useState<string | null>(null);
+│  const currentYear = new Date().getFullYear();
+│  const activeSection = policySections.find((s) => s.slug === 
+modalOpen);
+│
+│  return (
+│    <>
+│      <footer className="bg-background border-t border-border">
+│        <div className="container mx-auto px-6 py-16">
+│          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 
+items-center">
+│            {/* Brand */}
+│            <div className="text-center md:text-left">
+│              <div className="flex items-center justify-center 
+md:justify-start gap-3 mb-4">
+│                <div className="w-10 h-10 rounded-full 
+overflow-hidden border border-border">
+│                  <Image
+│                    src="/images/logo.jpg"
+⋮
+│                <h4 className="text-xl font-medium tracking-tight 
+text-foreground">
+│                  NawaNapam
+│                </h4>
+│              </div>
+│              <p className="text-xs text-muted-foreground">
+│                Connecting souls with respect and warmth
+│              </p>
+│              <a
+│                href="mailto:support@nawanapam.com"
+│                className="flex items-center justify-center 
+md:justify-start gap-2 mt-4 text-sm tex
+│              >
+│                <Mail size={14} />
+│                <span 
+className="font-medium">support@nawanapam.com</span>
+│              </a>
+│            </div>
+│
+│            {/* Policy Links */}
+│            <div className="flex flex-wrap justify-center gap-6 
+text-sm">
+│              {policySections.map((section) => (
+│                <button
+│                  key={section.slug}
+│                  onClick={() => setModalOpen(section.slug)}
+│                  className="text-body hover:text-foreground 
+font-medium transition-colors"
+│                >
+│                  {section.title.replace(/ of | /g, " ")}
+│                </button>
+⋮
+│            <div className="text-center md:text-right">
+│              <button
+│                onClick={() => window.scrollTo({ top: 0, behavior:
+"smooth" })}
+│                className="inline-flex items-center gap-2 text-sm 
+font-medium text-body hover:text-
+│              >
+│                <div className="p-2 rounded-full border 
+border-border group-hover:bg-accent transit
+│                  <ArrowUp size={16} />
+│                </div>
+│                Back to Top
+│              </button>
+⋮
+
+fe/src/components/custom/ForgetPassword.tsx:
+⋮
+│                <button
+│                  onClick={() => setStep(step === "otp" ? "email" 
+: "otp")}
+│                  className="p-2 rounded-full border border-border
+hover:bg-accent transition-color
+⋮
+│                    <>
+│                      <Clock size={16} />
+│                      Resend in {formatTime(resendCooldown)}
+⋮
+
+fe/src/components/custom/Header.tsx:
+⋮
+│interface BeforeInstallPromptEvent extends Event {
+│  prompt: () => Promise<void>;
+│  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+⋮
+
+fe/src/components/custom/StreakHeatmap.tsx:
+⋮
+│type Props = {
+│  // Fetch is deferred until true, so callers that register 
+today's session
+│  // first (e.g. NMBadge) can avoid a race where the heatmap reads
+before
+│  // today's activity row is written.
+│  ready?: boolean;
+⋮
+
+fe/src/components/custom/StreakMilestoneModal.tsx:
+⋮
+│type Props = {
+│  streak: number | null;
+│  onClose: () => void;
+⋮
+
+fe/src/components/custom/VideoChat.tsx:
+⋮
+│interface VideoChatPageProps {
+│  gender: string;
+⋮
+
+fe/src/components/custom/WebVitals.tsx:
+⋮
+│export function WebVitals() {
+│  useReportWebVitals((metric) => {
+│    // Log in development
+│    if (process.env.NODE_ENV === "development") {
+│      console.log(metric);
+│    }
+│
+│    // Send to analytics in production
+│    // The Vercel Analytics component will handle this 
+automatically
+│  });
+│
+⋮
+
+fe/src/components/native/NativeCallHistory.tsx:
+⋮
+│type CallHistoryEntry = {
+│  id: string;
+│  roomId: string;
+│  peerId: string | null;
+│  peerUsername: string | null;
+│  startedAt: string | null;
+│  endedAt: string | null;
+│  durationSec: number | null;
+│  createdAt: string;
+⋮
+
+fe/src/components/native/NativeDashboard.tsx:
+⋮
+│type MatchPref = "RANDOM" | "MALE" | "FEMALE";
+│
+⋮
+│                  id={`pref-${value.toLowerCase()}`}
+│                  onClick={() => setMatchPref(value)}
+⋮
+
+fe/src/components/native/NativeSettings.tsx:
+⋮
+│type EditableField = "name" | "username" | "phoneNumber" | 
+"gender";
+│
+│interface InlineEditorProps {
+│  label: string;
+│  value: string;
+│  field: EditableField;
+│  type?: string;
+│  placeholder?: string;
+│  onSave: (field: EditableField, value: string) => Promise<void>;
+│  saving: boolean;
+│  disabled?: boolean;
+│  genderPicker?: boolean;
+⋮
+
+fe/src/components/native/NativeShell.tsx:
+⋮
+│interface NativeShellProps {
+│  children: React.ReactNode;
+⋮
+
+fe/src/components/ui/alert-dialog.tsx:
+⋮
+│function AlertDialog({
+│  ...props
+⋮
+│function AlertDialogDescription({
+│  className,
+│  ...props
+⋮
+
+fe/src/components/ui/aspect-ratio.tsx:
+⋮
+│function AspectRatio({
+│  ...props
+⋮
+
+fe/src/components/ui/calendar.tsx:
+⋮
+│function Calendar({
+│  className,
+│  classNames,
+│  showOutsideDays = true,
+│  captionLayout = "label",
+│  buttonVariant = "ghost",
+│  formatters,
+│  components,
+│  ...props
+⋮
+
+fe/src/components/ui/card.tsx:
+⋮
+│function CardDescription({ className, ...props }: 
+React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card-description"
+│      className={cn("text-muted-foreground text-sm", className)}
+│      {...props}
+│    />
+│  )
+⋮
+│function CardAction({ className, ...props }: 
+React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card-action"
+│      className={cn(
+│        "col-start-2 row-span-2 row-start-1 self-start 
+justify-self-end",
+│        className
+│      )}
+│      {...props}
+│    />
+⋮
+│function CardFooter({ className, ...props }: 
+React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="card-footer"
+│      className={cn("flex items-center px-6 [.border-t]:pt-6", 
+className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/carousel.tsx:
+⋮
+│type CarouselApi = UseEmblaCarouselType[1]
+│type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+│type CarouselOptions = UseCarouselParameters[0]
+│type CarouselPlugin = UseCarouselParameters[1]
+│
+⋮
+
+fe/src/components/ui/chart.tsx:
+⋮
+│export type ChartConfig = {
+│  [k in string]: {
+│    label?: React.ReactNode
+│    icon?: React.ComponentType
+│  } & (
+│    | { color?: string; theme?: never }
+│    | { color?: never; theme: Record<keyof typeof THEMES, string> 
+}
+│  )
+⋮
+
+fe/src/components/ui/collapsible.tsx:
+⋮
+│function Collapsible({
+│  ...props
+⋮
+
+fe/src/components/ui/dialog.tsx:
+⋮
+│function DialogPortal({
+│  ...props
+⋮
+
+fe/src/components/ui/input-otp.tsx:
+⋮
+│function InputOTP({
+│  className,
+│  containerClassName,
+│  ...props
+⋮
+│function InputOTPGroup({ className, ...props }: 
+React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="input-otp-group"
+│      className={cn("flex items-center", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/navigation-menu.tsx:
+⋮
+│function NavigationMenu({
+│  className,
+│  children,
+│  viewport = true,
+│  ...props
+⋮
+│}) {
+⋮
+│function NavigationMenuTrigger({
+│  className,
+│  children,
+│  ...props
+⋮
+│function NavigationMenuContent({
+│  className,
+│  ...props
+⋮
+│function NavigationMenuViewport({
+│  className,
+│  ...props
+⋮
+
+fe/src/components/ui/pagination.tsx:
+⋮
+│type PaginationLinkProps = {
+│  isActive?: boolean
+⋮
+
+fe/src/components/ui/radio-group.tsx:
+⋮
+│function RadioGroup({
+│  className,
+│  ...props
+⋮
+│function RadioGroupItem({
+│  className,
+│  ...props
+⋮
+
+fe/src/components/ui/separator.tsx:
+⋮
+│function Separator({
+│  className,
+│  orientation = "horizontal",
+│  decorative = true,
+│  ...props
+⋮
+
+fe/src/components/ui/skeleton.tsx:
+⋮
+│function Skeleton({ className, ...props }: 
+React.ComponentProps<"div">) {
+│  return (
+│    <div
+│      data-slot="skeleton"
+│      className={cn("bg-accent animate-pulse rounded-md", 
+className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/table.tsx:
+⋮
+│function TableHeader({ className, ...props }: 
+React.ComponentProps<"thead">) {
+│  return (
+│    <thead
+│      data-slot="table-header"
+│      className={cn("[&_tr]:border-b", className)}
+│      {...props}
+│    />
+│  )
+⋮
+│function TableBody({ className, ...props }: 
+React.ComponentProps<"tbody">) {
+│  return (
+│    <tbody
+│      data-slot="table-body"
+│      className={cn("[&_tr:last-child]:border-0", className)}
+│      {...props}
+│    />
+│  )
+⋮
+
+fe/src/components/ui/toggle-group.tsx:
+⋮
+│function ToggleGroup({
+│  className,
+│  variant,
+│  size,
+│  children,
+│  ...props
+⋮
+│function ToggleGroupItem({
+│  className,
+│  children,
+│  variant,
+│  size,
+│  ...props
+⋮
+
+fe/src/constants/policies.ts:
+│export interface PolicySection {
+⋮
+
+fe/src/hooks/SocketProvider.ts:
+⋮
+│export type PeerInfo = { userId: string; username?: string };
+│export type SignalingStatus = "idle" | "searching" | "matched" | 
+"ended";
+│
+⋮
+│function log(prefix: string, ...args: unknown[]) {
+│  // console.log(
+│  //   `%c[Signaling:${prefix}]`,
+│  //   "color: #ffb100; font-weight: bold",
+│  //   ...args
+│  // );
+⋮
+│export type NMUpdatePayload = {
+│  tier: string;
+│  xp: number;
+│  currentStreak: number;
+│  longestStreak: number;
+│  newAchievements: { key: string; name: string; description: 
+string }[];
+│  milestoneStreak: number | null;
+⋮
+
+fe/src/hooks/use-getuser.ts:
+⋮
+│export function useGetUser() {
+│  const { data: session, status } = useSession();
+│  
+│  // Return the full user object directly from session
+│  // This ensures we get all fields including username
+│  const user = React.useMemo(() => {
+│    if (status === "authenticated" && session?.user) {
+│      return {
+│        id: session.user.id,
+│        email: session.user.email,
+⋮
+
+fe/src/hooks/use-mobile.ts:
+⋮
+│export function useIsMobile() {
+│  const [isMobile, setIsMobile] = React.useState<boolean | 
+undefined>(undefined)
+│
+│  React.useEffect(() => {
+│    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT
+- 1}px)`)
+│    const onChange = () => {
+│      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+│    }
+│    mql.addEventListener("change", onChange)
+│    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+⋮
+
+fe/src/hooks/use-update-user.ts:
+⋮
+│interface UpdateUserData {
+│  name?: string;
+│  username?: string;
+│  email?: string;
+│  password?: string;
+│  image?: string;
+⋮
+
+fe/src/hooks/useWebRTC.ts:
+⋮
+│type UseWebRTCArgs = {
+│  socket: Socket | null;
+│  roomId: string | null;
+│  selfUserId: string;
+│  offererHint?: string | null;
+│  localStreamRef: React.MutableRefObject<MediaStream | null>;
+⋮
+│type UseWebRTCResult = {
+│  attachLocal: (el: HTMLVideoElement | null) => void;
+│  attachRemote: (el: HTMLVideoElement | null) => void;
+│  toggleAudio: (on?: boolean) => void;
+│  toggleVideo: (on?: boolean) => void;
+│  cleanupRemote: () => void;
+│  endCall: () => void;
+│  replaceVideoTrack: (track: MediaStreamTrack) => Promise<void>;
+│  connected: boolean;
+⋮
+
+fe/src/lib/authOptions.ts:
+⋮
+│providers.push(
+│  CredentialsProvider({
+│    name: "credentials",
+│    credentials: {
+│      email: { label: "Email", type: "text" },
+│      password: { label: "Password", type: "password" },
+│    },
+│    async authorize(credentials) {
+│      if (!credentials?.email || !credentials?.password) {
+│        return null;
+│      }
+│
+│      const user = await prisma.user.findUnique({
+│        where: { email: credentials.email },
+│      });
+│
+│      if (!user || !user.passwordHash) {
+⋮
+│if (googleIdTokenClient) {
+│  providers.push(
+│    CredentialsProvider({
+│      id: "google-native",
+│      name: "Google (Native)",
+│      credentials: {
+│        idToken: { label: "ID Token", type: "text" },
+│      },
+│      async authorize(credentials) {
+│        if (!credentials?.idToken) {
+│          return null;
+│        }
+│
+│        let email: string | undefined;
+│        let name: string | undefined | null;
+│        let image: string | undefined | null;
+│        let emailVerified: boolean | undefined;
+│        let sub: string;
+│
+⋮
+│export const authOptions: NextAuthOptions = {
+│  adapter: PrismaAdapter(prisma),
+│  providers,
+│
+│  session: { strategy: "jwt" },
+│
+│  events: {
+│    async createUser({ user }) {
+│      // Send welcome email when a new user is created (OAuth 
+sign-up)
+│      if (user.email) {
+│        try {
+│          await sendWelcomeEmail(user.email);
+│          // console.log(`Welcome email sent to: ${user.email}`);
+│        } catch (error) {
+│          console.error(
+│            `Failed to send welcome email to ${user.email}:`,
+│            error,
+⋮
+│  callbacks: {
+│    async signIn({ user, account, profile }) {
+│      // Allow credentials sign-in
+│      if (account?.provider === "credentials") {
+│        return true;
+│      }
+│
+│      // Handle OAuth sign-in (Google, Instagram, etc.)
+│      if (account?.provider && user.email) {
+│        try {
+⋮
+│    async jwt({ token, user, trigger, session: _session }) {
+│      // On sign in, add ALL user data to token
+│      if (user) {
+│        token.id = user.id;
+│        token.username = user.username;
+│        token.phoneNumber = user.phoneNumber;
+│        token.gender = user.gender;
+│      }
+│
+│      // On update (if you use session update), refresh from DB
+⋮
+
+fe/src/lib/cropImage.ts:
+│export interface CropArea {
+⋮
+
+fe/src/lib/env-validation.ts:
+⋮
+│export type Env = z.infer<typeof envSchema>;
+│
+⋮
+
+fe/src/lib/nmScore.ts:
+⋮
+│export type NMScoreInputs = {
+│  currentStreak: number;
+│  totalSessions: number;
+│  conversationsStarted: number;
+│  conversationsCompleted: number;
+│  skipCount: number;
+│  reportsAgainstCount: number; // ACTION_TAKEN reports only
+│  xp: number;
+│  profileCompleted: boolean;
+│  emailVerified: boolean;
+⋮
+│export type StreakResult = {
+│  currentStreak: number;
+│  longestStreak: number;
+│  streakFreezes: number;
+│  freezeConsumed: boolean;
+│  isNewDay: boolean; // whether this call should count as a new 
+session for the day
+⋮
+│export type AchievementCheckState = {
+│  conversationsCompleted: number;
+│  currentStreak: number;
+│  emailVerified: boolean;
+⋮
+
+fe/src/lib/push/sendPush.ts:
+⋮
+│export type PushPayload = {
+│  title: string;
+│  body: string;
+│  /** Small string map only — FCM data payloads must be 
+string-to-string. */
+│  data?: Record<string, string>;
+⋮
+
+fe/src/lib/rate-limit.ts:
+⋮
+│export function getClientIdentifier(req: Request): string {
+│  // Try to get IP from headers (for deployments behind proxies)
+│  const forwardedFor = req.headers.get("x-forwarded-for");
+│  const realIp = req.headers.get("x-real-ip");
+│  const cfConnectingIp = req.headers.get("cf-connecting-ip");
+│
+│  const ip =
+│    cfConnectingIp || forwardedFor?.split(",")[0] || realIp || 
+"unknown";
+│
+│  return ip;
+⋮
+│export async function checkRateLimit(
+│  ratelimiter: Ratelimit,
+│  identifier: string
+⋮
+
+fe/src/platform/features.ts:
+⋮
+│export interface PlatformFeatures {
+│  auth: "native" | "web";
+│  storage: "preferences" | "local";
+│  notifications: boolean;
+│  sharing: "native" | "web";
+│  browserOAuth: boolean;
+⋮
+
+fe/src/platform/index.ts:
+⋮
+│export interface Platform {
+│  readonly os: "android" | "ios" | "web";
+│  readonly isWeb: boolean;
+│  readonly isNative: boolean;
+│  readonly isAndroid: boolean;
+│  readonly isIOS: boolean;
+│  readonly isCapacitor: boolean;
+│  readonly isLiveReload: boolean;
+│  readonly isProduction: boolean;
+│  readonly isDevelopment: boolean;
+⋮
+
+fe/src/platform/platform.ts:
+⋮
+│export interface PlatformInfo {
+│  os: OS;
+│  isNative: boolean;
+│  isAndroid: boolean;
+│  isIOS: boolean;
+│  isWeb: boolean;
+│  /** True whenever the real Capacitor native bridge is present, 
+ignoring dev overrides. */
+│  isCapacitor: boolean;
+│  /** Native app still pointed at a `next dev` server instead of 
+bundled assets. */
+│  isLiveReload: boolean;
+⋮
+
+fe/src/providers/AuthProvider.tsx:
+⋮
+│interface AuthProviderProps {
+│  children: React.ReactNode;
+⋮
+
+fe/src/services/notifications/NativeNotifications.ts:
+⋮
+│export class NativeNotifications implements NotificationProvider {
+│  private listenersAttached = false;
+│  private tapHandlers = new Set<(data: Record<string, string>) => 
+void>();
+│
+│  async requestPermission(): Promise<boolean> {
+│    const { PushNotifications } = await 
+import("@capacitor/push-notifications");
+│    const permission = await PushNotifications.checkPermissions();
+│    if (permission.receive === "granted") return true;
+│
+│    const requested = await 
+PushNotifications.requestPermissions();
+⋮
+│  private async attachListeners(onToken?: (token: string) => 
+void): Promise<void> {
+│    if (this.listenersAttached) return;
+│    this.listenersAttached = true;
+│
+│    const { PushNotifications } = await 
+import("@capacitor/push-notifications");
+│
+│    await PushNotifications.addListener("registration", async 
+(token) => {
+│      onToken?.(token.value);
+│      try {
+│        await fetch("/api/push/register-token", {
+⋮
+
+fe/src/services/share/ShareProvider.ts:
+│export interface SharePayload {
+⋮
+
+fe/src/services/toast/ToastProvider.ts:
+│export interface ToastOptions {
+⋮
+
