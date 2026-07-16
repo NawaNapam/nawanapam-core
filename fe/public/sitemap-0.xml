@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://www.nawanapam.com/settings/delete</loc><lastmod>2026-07-15T09:53:29.975Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/settings</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/complete-profile</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/analytics</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/login</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/dashboard</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/reports</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/settings/add-admin</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/rooms</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/moderation</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/settings</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.nawanapam.com/console/users</loc><lastmod>2026-07-15T09:53:29.976Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/settings/delete</loc><lastmod>2026-07-16T11:00:51.398Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/complete-profile</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/privacy-policy</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/data-safety</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/founders</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/community-guidelines</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/terms-of-service</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/login</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/reports</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/rooms</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/settings/add-admin</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/analytics</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/dashboard</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/moderation</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/users</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.nawanapam.com/console/settings</loc><lastmod>2026-07-16T11:00:51.401Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>

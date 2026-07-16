@@ -47,13 +47,17 @@ export default function Footer() {
             {/* Policy Links */}
             <div className="flex flex-wrap justify-center gap-6 text-sm">
               {policySections.map((section) => (
-                <button
+                <Link
                   key={section.slug}
-                  onClick={() => setModalOpen(section.slug)}
+                  href={`/${section.slug}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setModalOpen(section.slug);
+                  }}
                   className="text-body hover:text-foreground font-medium transition-colors"
                 >
                   {section.title.replace(/ of | /g, " ")}
-                </button>
+                </Link>
               ))}
             </div>
 
