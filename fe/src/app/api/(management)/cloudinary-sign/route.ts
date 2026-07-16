@@ -4,13 +4,27 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+const isConfigured = !!(cloudName && apiKey && apiSecret);
+
+if (isConfigured) {
+  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
+}
 
 export async function POST(req: Request) {
+  // Without these env vars, signing with `undefined` still returns 200 with
+  // a signature that fails at the Cloudinary upload step — same end result
+  // for the user, but this fails fast with a clear cause instead of masking
+  // a config gap behind a generic "upload failed" error.
+  if (!isConfigured) {
+    return NextResponse.json(
+      { error: "Avatar upload is not configured" },
+      { status: 503 },
+    );
+  }
+
   const identifier = getClientIdentifier(req);
   const { success } = await apiRateLimiter.limit(identifier);
   if (!success) {
@@ -33,17 +47,14 @@ export async function POST(req: Request) {
     overwrite: true,
   };
 
-  const signature = cloudinary.utils.api_sign_request(
-    paramsToSign,
-    process.env.CLOUDINARY_API_SECRET as string
-  );
+  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
 
   return NextResponse.json({
     signature,
     timestamp,
     folder,
     publicId,
-    apiKey: process.env.CLOUDINARY_API_KEY,
-    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey,
+    cloudName,
   });
 }
