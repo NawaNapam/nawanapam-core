@@ -51,8 +51,9 @@ export default function HeroSection() {
 
             {/* Description */}
             <p className="max-w-xl mx-auto text-lg text-body leading-relaxed">
-              Skip the small talk. Connect instantly with souls across Bharat
-              and the world — just you, them, and the moment.
+              NawaNapam is a free, anonymous video chat app. Skip the small
+              talk — connect instantly with souls across Bharat and the world,
+              just you, them, and the moment.
             </p>
 
             {/* CTA */}
