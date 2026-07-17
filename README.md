@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/NawaNapam/nawanapam-core/main/fe/public/images/nawanapam.png" alt="NawaNapam" width="96" height="96" />
 
-  <h1>NawaNapam Core</h1>
+  <h1>NawaNapam</h1>
 
   <p><strong>Instant, anonymous, one-on-one video chat — matched in seconds, protected by design.</strong></p>
 
@@ -31,13 +31,31 @@
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Features](#features)
+  - [🎥 Real-Time Communication](#-real-time-communication)
+  - [🎯 Matching](#-matching)
+  - [🔑 Authentication \& Identity](#-authentication--identity)
+  - [🛡️ Moderation \& Trust](#️-moderation--trust)
+  - [📱 Mobile](#-mobile)
+  - [⚡ Performance \& PWA](#-performance--pwa)
+  - [🔒 Security](#-security)
+  - [🧭 Admin Console](#-admin-console)
 - [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [1. Clone](#1-clone)
+  - [2. Database (local)](#2-database-local)
+  - [3. Backend](#3-backend)
+  - [4. Frontend](#4-frontend)
+  - [5. Open the app](#5-open-the-app)
+  - [Production build](#production-build)
 - [Environment Variables](#environment-variables)
+  - [Frontend (`fe/.env`)](#frontend-feenv)
+  - [Backend (`be/.env`)](#backend-beenv)
 - [Project Structure](#project-structure)
 - [Android App](#android-app)
 - [Security](#security)
@@ -65,22 +83,26 @@ This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.
 <td valign="top" width="50%">
 
 ### 🎥 Real-Time Communication
+
 - HD peer-to-peer video and audio via WebRTC
 - Live text chat alongside the video session
 - Sub-3-second match-to-connect time
 - Socket.IO signaling with heartbeat-based liveness checks
 
 ### 🎯 Matching
+
 - Gender-based preference filtering (random / male / female)
 - Redis-backed queue for low-latency pairing
 - Automatic re-match on skip or disconnect
 
 ### 🔑 Authentication & Identity
+
 - Anonymous sessions — no profile required to start
 - Email/OTP and Google OAuth via NextAuth.js
 - Native login/signup flows for the Android app
 
 ### 🛡️ Moderation & Trust
+
 - In-app reporting with a dedicated review queue
 - Moderation logs and user banning
 - Admin console with analytics and room oversight
@@ -89,21 +111,25 @@ This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.
 <td valign="top" width="50%">
 
 ### 📱 Mobile
+
 - Capacitor-wrapped Android app backed by the production site
 - Push notifications, native share, and status bar integration
 - Signed release builds via CI on tag push
 
 ### ⚡ Performance & PWA
+
 - Installable Progressive Web App with offline support
 - Turbopack-powered builds and edge-optimized rendering
 - Background sync and push notifications (in progress)
 
 ### 🔒 Security
+
 - CSRF protection, Helmet security headers, strict CSP
 - Redis-backed rate limiting on APIs and auth routes
 - Zod + express-validator input validation, bcrypt hashing
 
 ### 🧭 Admin Console
+
 - Dashboard, analytics, and user management
 - Reports, moderation logs, and room inspection
 - Role-scoped admin sessions, separate from user auth
@@ -121,8 +147,8 @@ This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.
 
 <div align="center">
 
-| Landing | Video Chat | Admin Console |
-|:---:|:---:|:---:|
+|                                        Landing                                        |                                       Video Chat                                       |                                        Admin Console                                         |
+| :-----------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
 | <img src="docs/screenshots/landing.png" width="260" alt="Landing page placeholder" /> | <img src="docs/screenshots/video-chat.png" width="260" alt="Video chat placeholder" /> | <img src="docs/screenshots/admin-console.png" width="260" alt="Admin console placeholder" /> |
 
 </div>
@@ -146,31 +172,31 @@ flowchart LR
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend framework | Next.js 15 (App Router, Turbopack), React 19, TypeScript |
-| Styling / UI | Tailwind CSS v4, Radix UI primitives, Framer Motion |
-| State & forms | Zustand, React Hook Form, Zod |
-| Auth | NextAuth.js (Prisma adapter), Google OAuth, bcryptjs |
-| Database | PostgreSQL, Prisma ORM |
-| Realtime backend | Node.js, TypeScript, Express 5, Socket.IO |
-| Cache / matching store | Redis (`ioredis`), Upstash Redis (rate limiting) |
-| Media | WebRTC, Cloudinary |
-| Email | Resend, React Email |
-| Push notifications | Firebase Admin, Capacitor Push Notifications |
-| Mobile | Capacitor 8 (Android) |
-| Hosting / CI | Vercel, GitHub Actions, Docker Compose (local Postgres) |
+| Layer                  | Technology                                               |
+| ---------------------- | -------------------------------------------------------- |
+| Frontend framework     | Next.js 15 (App Router, Turbopack), React 19, TypeScript |
+| Styling / UI           | Tailwind CSS v4, Radix UI primitives, Framer Motion      |
+| State & forms          | Zustand, React Hook Form, Zod                            |
+| Auth                   | NextAuth.js (Prisma adapter), Google OAuth, bcryptjs     |
+| Database               | PostgreSQL, Prisma ORM                                   |
+| Realtime backend       | Node.js, TypeScript, Express 5, Socket.IO                |
+| Cache / matching store | Redis (`ioredis`), Upstash Redis (rate limiting)         |
+| Media                  | WebRTC, Cloudinary                                       |
+| Email                  | Resend, React Email                                      |
+| Push notifications     | Firebase Admin, Capacitor Push Notifications             |
+| Mobile                 | Capacitor 8 (Android)                                    |
+| Hosting / CI           | Vercel, GitHub Actions, Docker Compose (local Postgres)  |
 
 ## Getting Started
 
 ### Prerequisites
 
-| Requirement | Version |
-|---|---|
-| Node.js | 20+ (22+ if building the Android app) |
-| PostgreSQL | 15+ |
-| Redis | 6+ |
-| Java | 21 (Android builds only) |
+| Requirement | Version                               |
+| ----------- | ------------------------------------- |
+| Node.js     | 20+ (22+ if building the Android app) |
+| PostgreSQL  | 15+                                   |
+| Redis       | 6+                                    |
+| Java        | 21 (Android builds only)              |
 
 ### 1. Clone
 
@@ -224,30 +250,30 @@ cd be && npm run build && npm start
 
 ### Frontend (`fe/.env`)
 
-| Variable | Required | Description |
-|---|:---:|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `NEXTAUTH_URL` | ✅ | Canonical app URL used by NextAuth |
-| `NEXTAUTH_SECRET` | ✅ | NextAuth session secret (32+ chars) |
-| `UPSTASH_REDIS_REST_URL` | ✅ | Upstash Redis REST endpoint (rate limiting) |
-| `UPSTASH_REDIS_REST_TOKEN` | ✅ | Upstash Redis REST token |
-| `NEXT_PUBLIC_SIGNALING_URL` | ✅ | URL of the backend Socket.IO server |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | – | Google OAuth credentials |
-| `RESEND_API_KEY` | – | Transactional email (welcome, OTP, admin alerts) |
-| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | – | Media uploads |
-| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | – | Push notification delivery |
-| `NEXT_SHARED_SECRET` | – | Shared secret for trusted fe ↔ be requests |
-| `NODE_ENV` | – | `development` \| `production` \| `test` |
+| Variable                                                                 | Required | Description                                      |
+| ------------------------------------------------------------------------ | :------: | ------------------------------------------------ |
+| `DATABASE_URL`                                                           |    ✅    | PostgreSQL connection string                     |
+| `NEXTAUTH_URL`                                                           |    ✅    | Canonical app URL used by NextAuth               |
+| `NEXTAUTH_SECRET`                                                        |    ✅    | NextAuth session secret (32+ chars)              |
+| `UPSTASH_REDIS_REST_URL`                                                 |    ✅    | Upstash Redis REST endpoint (rate limiting)      |
+| `UPSTASH_REDIS_REST_TOKEN`                                               |    ✅    | Upstash Redis REST token                         |
+| `NEXT_PUBLIC_SIGNALING_URL`                                              |    ✅    | URL of the backend Socket.IO server              |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                              |    –     | Google OAuth credentials                         |
+| `RESEND_API_KEY`                                                         |    –     | Transactional email (welcome, OTP, admin alerts) |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` |    –     | Media uploads                                    |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` |    –     | Push notification delivery                       |
+| `NEXT_SHARED_SECRET`                                                     |    –     | Shared secret for trusted fe ↔ be requests       |
+| `NODE_ENV`                                                               |    –     | `development` \| `production` \| `test`          |
 
 ### Backend (`be/.env`)
 
-| Variable | Required | Description |
-|---|:---:|---|
-| `PORT` | – | HTTP/Socket.IO port (default `8080`) |
-| `REDIS_HOST` / `REDIS_PORT` | – | Redis connection (or use `REDIS_URL`) |
-| `REDIS_PASSWORD` / `REDIS_USERNAME` / `REDIS_TLS` | – | Redis auth and TLS options |
-| `STALE_MS` | – | Idle-session timeout used by the match handler |
-| `NEXT_SHARED_SECRET` | – | Must match the frontend's shared secret |
+| Variable                                          | Required | Description                                    |
+| ------------------------------------------------- | :------: | ---------------------------------------------- |
+| `PORT`                                            |    –     | HTTP/Socket.IO port (default `8080`)           |
+| `REDIS_HOST` / `REDIS_PORT`                       |    –     | Redis connection (or use `REDIS_URL`)          |
+| `REDIS_PASSWORD` / `REDIS_USERNAME` / `REDIS_TLS` |    –     | Redis auth and TLS options                     |
+| `STALE_MS`                                        |    –     | Idle-session timeout used by the match handler |
+| `NEXT_SHARED_SECRET`                              |    –     | Must match the frontend's shared secret        |
 
 > Additional tuning variables (`STREAM_*`, `HTTP_TIMEOUT_MS`, `INITIAL_BACKOFF_MS`, `MAX_BACKOFF_MS`) configure the retry-persist worker's Redis stream consumer — sensible defaults are used if unset.
 
@@ -296,12 +322,12 @@ Release builds are signed using an environment-driven `signingConfig` in [`fe/an
 
 Add these repository secrets (**Settings → Secrets and variables → Actions**):
 
-| Secret | Value |
-|---|---|
-| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 release.keystore` output |
-| `ANDROID_KEYSTORE_PASSWORD` | keystore password |
-| `ANDROID_KEY_ALIAS` | key alias |
-| `ANDROID_KEY_PASSWORD` | key password |
+| Secret                      | Value                                |
+| --------------------------- | ------------------------------------ |
+| `ANDROID_KEYSTORE_BASE64`   | `base64 -w0 release.keystore` output |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore password                    |
+| `ANDROID_KEY_ALIAS`         | key alias                            |
+| `ANDROID_KEY_PASSWORD`      | key password                         |
 
 ```bash
 git tag android-v1.0.0
@@ -330,27 +356,27 @@ Without `adb`, transfer the APK to the device and open it from a file manager, a
 
 ## Security
 
-| Layer | Implementation |
-|---|---|
-| Transport | HSTS, strict CSP, and standard security headers via `next.config.ts` |
-| CSRF | Edge CSRF tokens on state-changing forms |
-| Rate limiting | Upstash Redis — tiered limits for API, auth, and sensitive routes; `express-rate-limit` on the backend |
-| Input validation | Zod schemas (frontend), `express-validator` (backend), DOMPurify HTML sanitization |
-| Passwords | bcrypt hashing, strong-password policy |
-| Sessions | Secure, cookie-based via NextAuth; separate `Admin` / `AdminSession` models for the console |
-| API hardening | Method + content-type validation, origin verification, constant-time comparisons, request size limits |
-| Backend | Helmet security headers, CORS allow-listing |
+| Layer            | Implementation                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Transport        | HSTS, strict CSP, and standard security headers via `next.config.ts`                                   |
+| CSRF             | Edge CSRF tokens on state-changing forms                                                               |
+| Rate limiting    | Upstash Redis — tiered limits for API, auth, and sensitive routes; `express-rate-limit` on the backend |
+| Input validation | Zod schemas (frontend), `express-validator` (backend), DOMPurify HTML sanitization                     |
+| Passwords        | bcrypt hashing, strong-password policy                                                                 |
+| Sessions         | Secure, cookie-based via NextAuth; separate `Admin` / `AdminSession` models for the console            |
+| API hardening    | Method + content-type validation, origin verification, constant-time comparisons, request size limits  |
+| Backend          | Helmet security headers, CORS allow-listing                                                            |
 
 ## API Overview
 
 The frontend exposes Next.js API routes under `fe/src/app/api/` for auth, user profile/settings, and admin operations (reports, moderation, analytics) — scoped by session role and rate-limited per route. The realtime backend does not expose REST endpoints; it communicates entirely over **Socket.IO events**:
 
-| Namespace | Responsibility |
-|---|---|
-| `auth` | Session handshake and identity verification |
-| `match` | Queueing and pairing users by preference |
-| `rtc` | WebRTC offer/answer/ICE signaling relay |
-| `chat` | In-session text messages |
+| Namespace   | Responsibility                               |
+| ----------- | -------------------------------------------- |
+| `auth`      | Session handshake and identity verification  |
+| `match`     | Queueing and pairing users by preference     |
+| `rtc`       | WebRTC offer/answer/ICE signaling relay      |
+| `chat`      | In-session text messages                     |
 | `heartbeat` | Liveness detection and stale-session cleanup |
 
 Full endpoint-level documentation is intentionally out of scope here — read the relevant handler in `be/src/socket/` or `fe/src/app/api/` for exact contracts.
