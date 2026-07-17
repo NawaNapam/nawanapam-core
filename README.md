@@ -16,7 +16,7 @@
     <a href="https://github.com/NawaNapam/nawanapam-core/releases"><img src="https://img.shields.io/github/v/release/NawaNapam/nawanapam-core?label=release&sort=semver" alt="Latest release" /></a>
     <a href="https://github.com/NawaNapam/nawanapam-core/commits/main"><img src="https://img.shields.io/github/last-commit/NawaNapam/nawanapam-core" alt="Last commit" /></a>
     <img src="https://img.shields.io/badge/platform-web%20%7C%20android-informational" alt="Platform: Web and Android" />
-    <a href="./LICENCE"><img src="https://img.shields.io/badge/license-proprietary-lightgrey" alt="License: Proprietary" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-proprietary-lightgrey" alt="License: Proprietary" /></a>
   </p>
 
   <p>
@@ -34,14 +34,14 @@
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Features](#features)
-  - [🎥 Real-Time Communication](#-real-time-communication)
-  - [🎯 Matching](#-matching)
-  - [🔑 Authentication \& Identity](#-authentication--identity)
-  - [🛡️ Moderation \& Trust](#️-moderation--trust)
-  - [📱 Mobile](#-mobile)
-  - [⚡ Performance \& PWA](#-performance--pwa)
-  - [🔒 Security](#-security)
-  - [🧭 Admin Console](#-admin-console)
+  - [Real-Time Communication](#real-time-communication)
+  - [Matching](#matching)
+  - [Authentication \& Identity](#authentication--identity)
+  - [Moderation \& Trust](#moderation--trust)
+  - [Mobile](#mobile)
+  - [Performance \& PWA](#performance--pwa)
+  - [Security](#security)
+  - [Admin Console](#admin-console)
 - [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
@@ -58,7 +58,7 @@
   - [Backend (`be/.env`)](#backend-beenv)
 - [Project Structure](#project-structure)
 - [Android App](#android-app)
-- [Security](#security)
+- [Security](#security-1)
 - [API Overview](#api-overview)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -74,7 +74,7 @@
 
 This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.IO realtime backend, and the Capacitor project that ships the Android app. It exists to give NawaNapam's team a single, coherent codebase for the web app, the matching/signaling server, and the admin console that keeps the platform safe to use.
 
-> Access to this repository and its source is governed by the [LICENCE](./LICENCE) — see [License](#license) below.
+> **This repository is publicly visible but is not open source.** Viewing or cloning this code on GitHub does not grant any right to use, copy, modify, distribute, or otherwise exploit it. Access is governed by the [LICENSE](./LICENSE) — see [License](#license) below.
 
 ## Features
 
@@ -82,26 +82,26 @@ This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.
 <tr>
 <td valign="top" width="50%">
 
-### 🎥 Real-Time Communication
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/video.svg" width="18" height="18" valign="middle" alt="" /> Real-Time Communication
 
 - HD peer-to-peer video and audio via WebRTC
 - Live text chat alongside the video session
 - Sub-3-second match-to-connect time
 - Socket.IO signaling with heartbeat-based liveness checks
 
-### 🎯 Matching
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/target.svg" width="18" height="18" valign="middle" alt="" /> Matching
 
 - Gender-based preference filtering (random / male / female)
 - Redis-backed queue for low-latency pairing
 - Automatic re-match on skip or disconnect
 
-### 🔑 Authentication & Identity
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/key-round.svg" width="18" height="18" valign="middle" alt="" /> Authentication & Identity
 
 - Anonymous sessions — no profile required to start
 - Email/OTP and Google OAuth via NextAuth.js
 - Native login/signup flows for the Android app
 
-### 🛡️ Moderation & Trust
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/shield-check.svg" width="18" height="18" valign="middle" alt="" /> Moderation & Trust
 
 - In-app reporting with a dedicated review queue
 - Moderation logs and user banning
@@ -110,25 +110,25 @@ This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.
 </td>
 <td valign="top" width="50%">
 
-### 📱 Mobile
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/smartphone.svg" width="18" height="18" valign="middle" alt="" /> Mobile
 
 - Capacitor-wrapped Android app backed by the production site
 - Push notifications, native share, and status bar integration
 - Signed release builds via CI on tag push
 
-### ⚡ Performance & PWA
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/zap.svg" width="18" height="18" valign="middle" alt="" /> Performance & PWA
 
 - Installable Progressive Web App with offline support
 - Turbopack-powered builds and edge-optimized rendering
 - Background sync and push notifications (in progress)
 
-### 🔒 Security
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/lock.svg" width="18" height="18" valign="middle" alt="" /> Security
 
 - CSRF protection, Helmet security headers, strict CSP
 - Redis-backed rate limiting on APIs and auth routes
 - Zod + express-validator input validation, bcrypt hashing
 
-### 🧭 Admin Console
+### <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/layout-dashboard.svg" width="18" height="18" valign="middle" alt="" /> Admin Console
 
 - Dashboard, analytics, and user management
 - Reports, moderation logs, and room inspection
@@ -252,12 +252,12 @@ cd be && npm run build && npm start
 
 | Variable                                                                 | Required | Description                                      |
 | ------------------------------------------------------------------------ | :------: | ------------------------------------------------ |
-| `DATABASE_URL`                                                           |    ✅    | PostgreSQL connection string                     |
-| `NEXTAUTH_URL`                                                           |    ✅    | Canonical app URL used by NextAuth               |
-| `NEXTAUTH_SECRET`                                                        |    ✅    | NextAuth session secret (32+ chars)              |
-| `UPSTASH_REDIS_REST_URL`                                                 |    ✅    | Upstash Redis REST endpoint (rate limiting)      |
-| `UPSTASH_REDIS_REST_TOKEN`                                               |    ✅    | Upstash Redis REST token                         |
-| `NEXT_PUBLIC_SIGNALING_URL`                                              |    ✅    | URL of the backend Socket.IO server              |
+| `DATABASE_URL`                                                           |   Yes   | PostgreSQL connection string                     |
+| `NEXTAUTH_URL`                                                           |   Yes   | Canonical app URL used by NextAuth               |
+| `NEXTAUTH_SECRET`                                                        |   Yes   | NextAuth session secret (32+ chars)              |
+| `UPSTASH_REDIS_REST_URL`                                                 |   Yes   | Upstash Redis REST endpoint (rate limiting)      |
+| `UPSTASH_REDIS_REST_TOKEN`                                               |   Yes   | Upstash Redis REST token                         |
+| `NEXT_PUBLIC_SIGNALING_URL`                                              |   Yes   | URL of the backend Socket.IO server              |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                              |    –     | Google OAuth credentials                         |
 | `RESEND_API_KEY`                                                         |    –     | Transactional email (welcome, OTP, admin alerts) |
 | `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` |    –     | Media uploads                                    |
@@ -401,7 +401,7 @@ Full endpoint-level documentation is intentionally out of scope here — read th
 4. Open a pull request describing the change and its motivation
 5. Address review feedback — CI (`ci.yml`, `android-build.yml` where relevant) must be green before merge
 
-Contribution access to this repository is granted per the terms of the [LICENCE](./LICENCE).
+Contribution access to this repository is granted per the terms of the [LICENSE](./LICENSE). Only individuals approved by the NawaNapam organization — employees, maintainers, approved contributors, and authorized contractors — may submit or merge changes.
 
 ## Development Workflow
 
@@ -415,7 +415,7 @@ Contribution access to this repository is granted per the terms of the [LICENCE]
 <details>
 <summary><strong>Is NawaNapam Core open source?</strong></summary>
 <br />
-No. The repository is source-available to authorized contributors under a proprietary license — see <a href="./LICENCE">LICENCE</a>.
+No. The source code is publicly visible for transparency and portfolio purposes, but it is not open source. All rights are reserved, and no use, copying, modification, or redistribution is permitted outside the NawaNapam organization without prior written permission — see <a href="./LICENSE">LICENSE</a>.
 </details>
 
 <details>
@@ -438,7 +438,25 @@ Yes. Debug builds (<code>assembleDebug</code>) don't require signing secrets —
 
 ## License
 
-This project is licensed under a **Proprietary Internal-Use License** — see [LICENCE](./LICENCE) for full terms. Use, modification, and distribution are restricted to parties explicitly authorized by the copyright holder.
+**This repository is publicly visible but is not open source.**
+
+Copyright © 2026 NawaNapam. All Rights Reserved.
+
+Public visibility on GitHub exists for transparency, portfolio, documentation,
+and issue tracking within the NawaNapam organization — it is not, and must
+not be construed as, a grant of any license to use this code. Viewing or
+cloning this repository does **not** grant permission to reuse, copy,
+modify, distribute, host, sell, sublicense, commercialize, or create
+derivative works from any part of it, nor to use it to train or fine-tune
+any AI model.
+
+Development is restricted to Authorized Parties — employees, maintainers,
+approved contributors, and authorized contractors of the NawaNapam
+organization. Any use outside the NawaNapam organization requires prior
+written permission from the Company.
+
+Full terms are set out in [LICENSE](./LICENSE). See also [NOTICE.md](./NOTICE.md)
+for a plain-language summary.
 
 ---
 

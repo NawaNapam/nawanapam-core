@@ -1,14 +1,15 @@
-───────────────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────────────
 Using gpt-4o model with API key from environment.
 Aider v0.86.2
 Main model: gpt-4o with diff edit format
 Weak model: gpt-4o-mini
-Git repo: .git with 465 files
+Git repo: .git with 470 files
 Repo-map: using 4096 tokens, auto refresh
 Here are summaries of some files present in my git repository.
-Do not propose changes to these files, treat them as *read-only*.
-If you need to edit any of these files, ask me to *add them to the 
-chat* first.
+Do not propose changes to these files, treat them as 
+*read-only*.
+If you need to edit any of these files, ask me to *add them to 
+the chat* first.
 
 be/scripts/reverse-port.js:
 ⋮
@@ -25,7 +26,8 @@ successful!`);
 ${error.message}`);
 │    console.error("Make sure:");
 │    console.error("1. ADB is installed and in your PATH");
-│    console.error("2. USB debugging is enabled on your device");
+│    console.error("2. USB debugging is enabled on your 
+device");
 ⋮
 
 be/src/app.ts:
@@ -34,11 +36,13 @@ be/src/app.ts:
 │  app.use(express.json());
 │  app.use(
 │    cors({
-│      origin: ["http://localhost:3000", "https://nawanapam.com"],
+│      origin: ["http://localhost:3000", 
+"https://nawanapam.com"],
 │    })
 │  );
 │
-│  const io = new Server(httpServer, { cors: { origin: "*" } });
+│  const io = new Server(httpServer, { cors: { origin: "*" } 
+});
 │
 │  async function start() {
 │    await loadScripts();
@@ -61,12 +65,14 @@ be/src/services/socket.service.ts:
 │  }
 │
 │  // for single ton pattern
-│  public static getInstance(server?: httpServer): SocketService {
+│  public static getInstance(server?: httpServer): 
+SocketService {
 ⋮
 
 be/src/socket/authHandler.ts:
 ⋮
-│export async function handleAuth(socket: Socket, payload: any) {
+│export async function handleAuth(socket: Socket, payload: any)
+{
 │  const { userId, username, gender } = payload || {};
 │  if (!userId) {
 │    socket.emit("auth:error", "userId required");
@@ -75,7 +81,8 @@ be/src/socket/authHandler.ts:
 │
 │  socket.data.userId = userId;
 │  socket.data.username = username ?? "";
-│  socket.data.gender = gender ?? ""; // Store user's actual gender
+│  socket.data.gender = gender ?? ""; // Store user's actual 
+gender
 │
 ⋮
 
@@ -91,9 +98,10 @@ be/src/socket/connection.ts:
 │    registerRtcHandlers(io, socket);
 │
 │    // --- auth/heartbeat/match ---
-│    socket.on("auth", (payload) => handleAuth(socket, payload));
-│    socket.on("heartbeat", (payload) => handleHeartbeat(socket, 
+│    socket.on("auth", (payload) => handleAuth(socket, 
 payload));
+│    socket.on("heartbeat", (payload) => 
+handleHeartbeat(socket, payload));
 │    socket.on("match:request", (payload) =>
 ⋮
 
@@ -107,7 +115,7 @@ be/src/socket/finalizeHandler.ts:
 
 be/src/socket/heartbeatHandler.ts:
 ⋮
-│export async function handleHeartbeat(socket: Socket, payload: 
+│export async function handleHeartbeat(socket: Socket, payload:
 any) {
 │  const userId = socket.data.userId;
 │  if (!userId) return;
@@ -163,8 +171,8 @@ Promise<NMSessionResult | null> {
 │    const controller = new AbortController();
 │    const t = setTimeout(() => controller.abort(), 
 HTTP_TIMEOUT_MS);
-│    const res = await fetch(`${NEXT_ORIGIN}/api/nm-score/session`,
-{
+│    const res = await 
+fetch(`${NEXT_ORIGIN}/api/nm-score/session`, {
 │      method: "POST",
 │      headers: {
 │        "content-type": "application/json",
@@ -183,8 +191,8 @@ be/src/utils/pushClient.ts:
 
 be/src/utils/redis/redisClient.ts:
 ⋮
-│export async function safeEvalSha(sha: string, ...args: unknown[])
-{
+│export async function safeEvalSha(sha: string, ...args: 
+unknown[]) {
 │  return redis.evalsha(sha, 0, ...(args as string[]));
 ⋮
 
@@ -195,14 +203,15 @@ be/src/utils/redis/scripts.ts:
 "match_and_claim.lua"), "utf8");
 │  const finalizeLua = fs.readFileSync(path.join(scriptsDir, 
 "finalize_room.lua"), "utf8");
-│  scripts.matchSha = String(await redis.script("LOAD", matchLua));
+│  scripts.matchSha = String(await redis.script("LOAD", 
+matchLua));
 │  scripts.finalizeSha = String(await redis.script("LOAD", 
 finalizeLua));
 │  console.log("Redis scripts loaded", scripts);
 ⋮
 
-fe/android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleI
-nstrumentedTest.java:
+fe/android/app/src/androidTest/java/com/getcapacitor/myapp/Exam
+pleInstrumentedTest.java:
 ⋮
 │@RunWith(AndroidJUnit4.class)
 │public class ExampleInstrumentedTest {
@@ -211,8 +220,8 @@ nstrumentedTest.java:
 │    public void useAppContext() throws Exception {
 ⋮
 
-fe/android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest
-.java:
+fe/android/app/src/test/java/com/getcapacitor/myapp/ExampleUnit
+Test.java:
 ⋮
 │public class ExampleUnitTest {
 │
@@ -235,10 +244,11 @@ fe/middleware.ts:
 req.nextUrl.pathname.startsWith("/console");
 │
 │  // Check admin session
-│  const adminSession = req.cookies.get("admin_session")?.value;
+│  const adminSession = 
+req.cookies.get("admin_session")?.value;
 │
-│  // If on admin route (not login) without session, redirect to 
-login
+│  // If on admin route (not login) without session, redirect 
+to login
 │  if (isAdminRoute && !isAdminLoginPage && !adminSession) {
 │    return NextResponse.redirect(new URL("/console/login", 
 req.url));
@@ -299,7 +309,8 @@ successful!`);
 ${error.message}`);
 │    console.error("Make sure:");
 │    console.error("1. ADB is installed and in your PATH");
-│    console.error("2. USB debugging is enabled on your device");
+│    console.error("2. USB debugging is enabled on your 
+device");
 ⋮
 
 fe/scripts/reverse-fe.js:
@@ -316,7 +327,8 @@ successful!`);
 ${error.message}`);
 │    console.error("Make sure:");
 │    console.error("1. ADB is installed and in your PATH");
-│    console.error("2. USB debugging is enabled on your device");
+│    console.error("2. USB debugging is enabled on your 
+device");
 ⋮
 
 fe/scripts/reverse-port.js:
@@ -333,7 +345,8 @@ successful!`);
 ${error.message}`);
 │    console.error("Make sure:");
 │    console.error("1. ADB is installed and in your PATH");
-│    console.error("2. USB debugging is enabled on your device");
+│    console.error("2. USB debugging is enabled on your 
+device");
 ⋮
 
 fe/src/app/(routes)/(auth)/forget-pass/page.tsx:
@@ -356,7 +369,8 @@ fe/src/app/(routes)/(insider)/chat/page.tsx:
 
 fe/src/app/Provider.tsx:
 ⋮
-│type Props = { children: ReactNode; session?: Session | null };
+│type Props = { children: ReactNode; session?: Session | null 
+};
 │
 ⋮
 
@@ -406,21 +420,22 @@ fe/src/app/api/push/register-token/route.ts:
 │export async function DELETE(req: NextRequest) {
 │  const session = await getServerSession(authOptions);
 │  if (!session?.user?.id) {
-│    return NextResponse.json({ error: "Unauthorized" }, { status: 
-401 });
+│    return NextResponse.json({ error: "Unauthorized" }, { 
+status: 401 });
 │  }
 │
 │  const body = await req.json();
 │  const token = body?.token;
 │  if (!token || typeof token !== "string") {
-│    return NextResponse.json({ error: "token is required" }, { 
+│    return NextResponse.json({ error: "token is required" }, {
 status: 400 });
 ⋮
 
 fe/src/app/console/analytics/page.tsx:
 ⋮
 │interface AnalyticsData {
-│  timeRange: { days: number; startDate: string; endDate: string };
+│  timeRange: { days: number; startDate: string; endDate: 
+string };
 │  userGrowth: Array<{ date: string; count: number }>;
 │  roomActivity: Array<{ date: string; count: number }>;
 │  reportsOverTime: Array<{ date: string; count: number }>;
@@ -453,7 +468,8 @@ fe/src/app/console/moderation/page.tsx:
 │              <Button
 │                variant="outline"
 │                size="sm"
-│                onClick={() => setPage((p) => Math.max(1, p - 1))}
+│                onClick={() => setPage((p) => Math.max(1, p - 
+1))}
 │                disabled={page === 1}
 ⋮
 
@@ -462,7 +478,8 @@ fe/src/app/console/reports/page.tsx:
 │              <Button
 │                variant="outline"
 │                size="sm"
-│                onClick={() => setPage((p) => Math.max(1, p - 1))}
+│                onClick={() => setPage((p) => Math.max(1, p - 
+1))}
 │                disabled={page === 1}
 ⋮
 
@@ -538,81 +555,29 @@ fe/src/components/custom/Dashboard.tsx:
 
 fe/src/components/custom/Footer.tsx:
 ⋮
-│export default function Footer() {
-│  const [modalOpen, setModalOpen] = useState<string | null>(null);
-│  const currentYear = new Date().getFullYear();
-│  const activeSection = policySections.find((s) => s.slug === 
-modalOpen);
-│
-│  return (
-│    <>
-│      <footer className="bg-background border-t border-border">
-│        <div className="container mx-auto px-6 py-16">
-│          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 
-items-center">
-│            {/* Brand */}
-│            <div className="text-center md:text-left">
-│              <div className="flex items-center justify-center 
-md:justify-start gap-3 mb-4">
-│                <div className="w-10 h-10 rounded-full 
-overflow-hidden border border-border">
-│                  <Image
-│                    src="/images/logo.jpg"
-⋮
-│                <h4 className="text-xl font-medium tracking-tight 
-text-foreground">
-│                  NawaNapam
-│                </h4>
-│              </div>
-│              <p className="text-xs text-muted-foreground">
-│                Connecting souls with respect and warmth
-│              </p>
-│              <a
-│                href="mailto:support@nawanapam.com"
-│                className="flex items-center justify-center 
-md:justify-start gap-2 mt-4 text-sm tex
-│              >
-│                <Mail size={14} />
-│                <span 
-className="font-medium">support@nawanapam.com</span>
-│              </a>
-│            </div>
-│
-│            {/* Policy Links */}
-│            <div className="flex flex-wrap justify-center gap-6 
-text-sm">
-│              {policySections.map((section) => (
-│                <button
+│                <Link
 │                  key={section.slug}
-│                  onClick={() => setModalOpen(section.slug)}
-│                  className="text-body hover:text-foreground 
-font-medium transition-colors"
-│                >
-│                  {section.title.replace(/ of | /g, " ")}
-│                </button>
+│                  href={`/${section.slug}`}
+│                  onClick={(e) => {
+│                    e.preventDefault();
+│                    setModalOpen(section.slug);
+│                  }}
 ⋮
 │            <div className="text-center md:text-right">
 │              <button
-│                onClick={() => window.scrollTo({ top: 0, behavior:
-"smooth" })}
-│                className="inline-flex items-center gap-2 text-sm 
-font-medium text-body hover:text-
-│              >
-│                <div className="p-2 rounded-full border 
-border-border group-hover:bg-accent transit
-│                  <ArrowUp size={16} />
-│                </div>
-│                Back to Top
-│              </button>
+│                onClick={() => window.scrollTo({ top: 0, 
+behavior: "smooth" })}
+│                className="inline-flex items-center gap-2 
+text-sm font-medium text-body hover:text-
 ⋮
 
 fe/src/components/custom/ForgetPassword.tsx:
 ⋮
 │                <button
-│                  onClick={() => setStep(step === "otp" ? "email" 
-: "otp")}
-│                  className="p-2 rounded-full border border-border
-hover:bg-accent transition-color
+│                  onClick={() => setStep(step === "otp" ? 
+"email" : "otp")}
+│                  className="p-2 rounded-full border 
+border-border hover:bg-accent transition-color
 ⋮
 │                    <>
 │                      <Clock size={16} />
@@ -626,13 +591,29 @@ fe/src/components/custom/Header.tsx:
 │  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 ⋮
 
+fe/src/components/custom/Landing.tsx:
+⋮
+│export default function Landing() {
+│  return (
+│    <main className="min-h-screen flex flex-col 
+bg-background">
+│      <Header />
+│      <section className="flex-1 flex flex-col w-full 
+pt-[calc(4rem+var(--status-bar-height))]">
+│        <HeroSection />
+│      </section>
+│      <Footer />
+│    </main>
+│  );
+⋮
+
 fe/src/components/custom/StreakHeatmap.tsx:
 ⋮
 │type Props = {
 │  // Fetch is deferred until true, so callers that register 
 today's session
-│  // first (e.g. NMBadge) can avoid a race where the heatmap reads
-before
+│  // first (e.g. NMBadge) can avoid a race where the heatmap 
+reads before
 │  // today's activity row is written.
 │  ready?: boolean;
 ⋮
@@ -699,7 +680,8 @@ fe/src/components/native/NativeSettings.tsx:
 │  field: EditableField;
 │  type?: string;
 │  placeholder?: string;
-│  onSave: (field: EditableField, value: string) => Promise<void>;
+│  onSave: (field: EditableField, value: string) => 
+Promise<void>;
 │  saving: boolean;
 │  disabled?: boolean;
 │  genderPicker?: boolean;
@@ -747,7 +729,8 @@ React.ComponentProps<"div">) {
 │  return (
 │    <div
 │      data-slot="card-description"
-│      className={cn("text-muted-foreground text-sm", className)}
+│      className={cn("text-muted-foreground text-sm", 
+className)}
 │      {...props}
 │    />
 │  )
@@ -770,7 +753,7 @@ React.ComponentProps<"div">) {
 │  return (
 │    <div
 │      data-slot="card-footer"
-│      className={cn("flex items-center px-6 [.border-t]:pt-6", 
+│      className={cn("flex items-center px-6 [.border-t]:pt-6",
 className)}
 │      {...props}
 │    />
@@ -780,7 +763,8 @@ className)}
 fe/src/components/ui/carousel.tsx:
 ⋮
 │type CarouselApi = UseEmblaCarouselType[1]
-│type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+│type UseCarouselParameters = Parameters<typeof 
+useEmblaCarousel>
 │type CarouselOptions = UseCarouselParameters[0]
 │type CarouselPlugin = UseCarouselParameters[1]
 │
@@ -794,8 +778,8 @@ fe/src/components/ui/chart.tsx:
 │    icon?: React.ComponentType
 │  } & (
 │    | { color?: string; theme?: never }
-│    | { color?: never; theme: Record<keyof typeof THEMES, string> 
-}
+│    | { color?: never; theme: Record<keyof typeof THEMES, 
+string> }
 │  )
 ⋮
 
@@ -838,15 +822,6 @@ fe/src/components/ui/navigation-menu.tsx:
 │  ...props
 ⋮
 │}) {
-⋮
-│function NavigationMenuTrigger({
-│  className,
-│  children,
-│  ...props
-⋮
-│function NavigationMenuContent({
-│  className,
-│  ...props
 ⋮
 │function NavigationMenuViewport({
 │  className,
@@ -940,8 +915,8 @@ fe/src/constants/policies.ts:
 fe/src/hooks/SocketProvider.ts:
 ⋮
 │export type PeerInfo = { userId: string; username?: string };
-│export type SignalingStatus = "idle" | "searching" | "matched" | 
-"ended";
+│export type SignalingStatus = "idle" | "searching" | "matched"
+| "ended";
 │
 ⋮
 │function log(prefix: string, ...args: unknown[]) {
@@ -982,8 +957,8 @@ fe/src/hooks/use-mobile.ts:
 undefined>(undefined)
 │
 │  React.useEffect(() => {
-│    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT
-- 1}px)`)
+│    const mql = window.matchMedia(`(max-width: 
+${MOBILE_BREAKPOINT - 1}px)`)
 │    const onChange = () => {
 │      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
 │    }
@@ -1017,7 +992,8 @@ fe/src/hooks/useWebRTC.ts:
 │  toggleVideo: (on?: boolean) => void;
 │  cleanupRemote: () => void;
 │  endCall: () => void;
-│  replaceVideoTrack: (track: MediaStreamTrack) => Promise<void>;
+│  replaceVideoTrack: (track: MediaStreamTrack) => 
+Promise<void>;
 │  connected: boolean;
 ⋮
 
@@ -1074,7 +1050,8 @@ sign-up)
 │      if (user.email) {
 │        try {
 │          await sendWelcomeEmail(user.email);
-│          // console.log(`Welcome email sent to: ${user.email}`);
+│          // console.log(`Welcome email sent to: 
+${user.email}`);
 │        } catch (error) {
 │          console.error(
 │            `Failed to send welcome email to ${user.email}:`,
@@ -1100,7 +1077,8 @@ sign-up)
 │        token.gender = user.gender;
 │      }
 │
-│      // On update (if you use session update), refresh from DB
+│      // On update (if you use session update), refresh from 
+DB
 ⋮
 
 fe/src/lib/cropImage.ts:
@@ -1131,8 +1109,8 @@ fe/src/lib/nmScore.ts:
 │  longestStreak: number;
 │  streakFreezes: number;
 │  freezeConsumed: boolean;
-│  isNewDay: boolean; // whether this call should count as a new 
-session for the day
+│  isNewDay: boolean; // whether this call should count as a 
+new session for the day
 ⋮
 │export type AchievementCheckState = {
 │  conversationsCompleted: number;
@@ -1153,13 +1131,14 @@ string-to-string. */
 fe/src/lib/rate-limit.ts:
 ⋮
 │export function getClientIdentifier(req: Request): string {
-│  // Try to get IP from headers (for deployments behind proxies)
+│  // Try to get IP from headers (for deployments behind 
+proxies)
 │  const forwardedFor = req.headers.get("x-forwarded-for");
 │  const realIp = req.headers.get("x-real-ip");
 │  const cfConnectingIp = req.headers.get("cf-connecting-ip");
 │
 │  const ip =
-│    cfConnectingIp || forwardedFor?.split(",")[0] || realIp || 
+│    cfConnectingIp || forwardedFor?.split(",")[0] || realIp ||
 "unknown";
 │
 │  return ip;
@@ -1201,11 +1180,11 @@ fe/src/platform/platform.ts:
 │  isAndroid: boolean;
 │  isIOS: boolean;
 │  isWeb: boolean;
-│  /** True whenever the real Capacitor native bridge is present, 
-ignoring dev overrides. */
+│  /** True whenever the real Capacitor native bridge is 
+present, ignoring dev overrides. */
 │  isCapacitor: boolean;
-│  /** Native app still pointed at a `next dev` server instead of 
-bundled assets. */
+│  /** Native app still pointed at a `next dev` server instead 
+of bundled assets. */
 │  isLiveReload: boolean;
 ⋮
 
@@ -1217,15 +1196,17 @@ fe/src/providers/AuthProvider.tsx:
 
 fe/src/services/notifications/NativeNotifications.ts:
 ⋮
-│export class NativeNotifications implements NotificationProvider {
+│export class NativeNotifications implements 
+NotificationProvider {
 │  private listenersAttached = false;
-│  private tapHandlers = new Set<(data: Record<string, string>) => 
-void>();
+│  private tapHandlers = new Set<(data: Record<string, string>)
+=> void>();
 │
 │  async requestPermission(): Promise<boolean> {
 │    const { PushNotifications } = await 
 import("@capacitor/push-notifications");
-│    const permission = await PushNotifications.checkPermissions();
+│    const permission = await 
+PushNotifications.checkPermissions();
 │    if (permission.receive === "granted") return true;
 │
 │    const requested = await 

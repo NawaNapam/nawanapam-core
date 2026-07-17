@@ -2,6 +2,7 @@
   "name": "fe",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",

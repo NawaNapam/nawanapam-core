@@ -1,0 +1,175 @@
+NawaNapam Proprietary Software License
+
+Copyright (c) 2026 NawaNapam. All Rights Reserved.
+
+Licensed Work: nawanapam-core, including all source code, object code,
+documentation, assets, and associated files contained in this repository
+(the "Software").
+Owner: NawaNapam ("Company", "Owner").
+Legal Contact: Rudramadhab Panda
+
+SPDX-License-Identifier: LicenseRef-NawaNapam-Proprietary
+
+-------------------------------------------------------------------------------
+
+NOTICE
+
+This repository is made publicly visible on GitHub for transparency,
+portfolio, documentation, issue tracking, and collaboration purposes only.
+Public visibility and the technical ability to clone or view this repository
+do NOT constitute, and must not be construed as, a grant of any license,
+permission, or right to use the Software.
+
+This is NOT open-source software. No open-source license applies to any
+part of this repository unless a separate file explicitly states otherwise
+for a specific third-party dependency.
+
+-------------------------------------------------------------------------------
+
+1. DEFINITIONS
+
+1.1 "Authorized Party" means an employee of the Company, a maintainer of
+    this repository, a contributor formally approved by the Company, or a
+    contractor engaged under a written agreement with the Company that
+    authorizes work on the Software.
+
+1.2 "NawaNapam Organization" means the Company, its employees, its officers,
+    and any Authorized Party acting within the scope of their authorization.
+
+1.3 "Use" means to access, read, execute, run, deploy, host, copy, reproduce,
+    modify, adapt, translate, create derivative works from, distribute,
+    sublicense, publish, republish, disclose, transmit, sell, lease, rent,
+    offer as a service, or otherwise exploit the Software, in whole or in
+    part, by any means and in any medium, including as training, fine-tuning,
+    or evaluation data for any machine learning or artificial intelligence
+    model.
+
+-------------------------------------------------------------------------------
+
+2. RESERVATION OF RIGHTS
+
+All rights, title, and interest in and to the Software, including all
+associated intellectual property rights, are and shall remain the exclusive
+property of the Company. No rights are granted to any person or entity
+except as expressly set forth in this License. All rights not expressly
+granted herein are reserved by the Company.
+
+-------------------------------------------------------------------------------
+
+3. GRANT OF RIGHTS — INTERNAL DEVELOPMENT ONLY
+
+Subject to the terms of this License, the Company grants a limited,
+non-exclusive, non-transferable, non-sublicensable, revocable right to
+Use the Software solely to Authorized Parties, and solely for the purpose
+of developing, testing, maintaining, and operating the Software on behalf
+of the Company.
+
+No right is granted under this Section 3 to any individual, organization,
+or entity that is not an Authorized Party acting within the NawaNapam
+Organization.
+
+-------------------------------------------------------------------------------
+
+4. PROHIBITED CONDUCT
+
+Except as expressly permitted under Section 3, or pursuant to prior written
+permission signed by an authorized representative of the Company, no person
+or entity outside the NawaNapam Organization may:
+
+  (a) use, execute, run, or deploy the Software or any part of it;
+  (b) copy or reproduce the Software or any substantial portion of it;
+  (c) modify, adapt, translate, or create derivative works based on the
+      Software;
+  (d) distribute, publish, republish, or otherwise make the Software
+      available to any third party;
+  (e) sublicense, sell, lease, rent, or otherwise transfer any rights in
+      the Software;
+  (f) host, mirror, or provide the Software or any derivative of it as a
+      product, platform, or service (including software-as-a-service);
+  (g) commercialize the Software or incorporate it, in whole or in part,
+      into any commercial product or offering;
+  (h) use the Software, or any substantial portion of its source code,
+      structure, or content, to train, fine-tune, evaluate, or otherwise
+      develop any machine learning or artificial intelligence model or
+      system; or
+  (i) remove, obscure, or alter any copyright, trademark, or proprietary
+      notice contained in the Software.
+
+Viewing or cloning this repository through GitHub's public interface does
+not constitute permission to engage in any of the foregoing conduct, is
+not a waiver of any right of the Company, and does not create any license
+by implication, estoppel, or otherwise.
+
+-------------------------------------------------------------------------------
+
+5. NO IMPLIED LICENSE
+
+No license or right is granted to any party by implication, estoppel,
+course of dealing, or otherwise, other than the rights expressly and
+explicitly granted in this License.
+
+-------------------------------------------------------------------------------
+
+6. REQUESTING PERMISSION
+
+Any person or entity outside the NawaNapam Organization seeking permission
+to use, copy, modify, distribute, or otherwise exploit the Software must
+obtain prior written permission from the Company by contacting the Legal
+Contact listed above. Any permission granted under this Section is valid
+only to the extent expressly stated in a signed written agreement and does
+not modify this License for any other party.
+
+-------------------------------------------------------------------------------
+
+7. THIRD-PARTY COMPONENTS
+
+The Software may incorporate third-party open-source components, each of
+which remains subject to its own license terms. Nothing in this License
+restricts rights granted under those third-party licenses with respect to
+the third-party components themselves. This License governs all original
+code, documentation, and assets authored by or for the Company.
+
+-------------------------------------------------------------------------------
+
+8. DISCLAIMER OF WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE COMPANY
+DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE OR UNINTERRUPTED.
+
+-------------------------------------------------------------------------------
+
+9. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE COMPANY BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+10. TERMINATION
+
+Any breach of this License by an Authorized Party automatically terminates
+all rights granted to that party under Section 3. Upon termination, the
+terminated party must immediately cease all Use of the Software and destroy
+or delete all copies in its possession or control, except where retention
+is required by law.
+
+-------------------------------------------------------------------------------
+
+11. ENFORCEMENT
+
+Unauthorized Use of the Software constitutes a violation of the Company's
+intellectual property rights and may result in civil and criminal
+liability. The Company reserves the right to pursue all available legal
+remedies, including injunctive relief and damages, against any party that
+Uses the Software in violation of this License.
+
+-------------------------------------------------------------------------------
+
+12. GOVERNING LAW
+
+This License is governed by and construed in accordance with the laws of
+the Republic of India, without regard to its conflict of laws principles.
