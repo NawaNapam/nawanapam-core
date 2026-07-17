@@ -6,3 +6,6 @@ dist/
 .aider*
 
 /secrets
+# Android signing
+*.keystore
+*.jks

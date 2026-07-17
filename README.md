@@ -1,270 +1,317 @@
 <div align="center">
+  <img src="https://raw.githubusercontent.com/NawaNapam/nawanapam-core/main/fe/public/images/nawanapam.png" alt="NawaNapam" width="96" height="96" />
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:111827,100:1f2937&height=110&section=header&text=NawaNapam&fontSize=38&fontColor=ffffff&animation=fadeIn&fontAlignY=55" width="100%" alt="NawaNapam" />
+  <h1>NawaNapam Core</h1>
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=3000&pause=1200&color=10B981&center=true&vCenter=true&width=560&lines=Anonymous+Video+Chat+%E2%80%A2+Real-time+Matching;WebRTC+%2B+Socket.IO+%2B+Next.js;Privacy+First+%E2%80%A2+No+Profile+Required" alt="Typing SVG" />
+  <p><strong>Instant, anonymous, one-on-one video chat — matched in seconds, protected by design.</strong></p>
 
-**PROPRIETARY - INTERNAL USE ONLY**
-This codebase is proprietary and confidential. Access and usage are restricted to authorized employees of NawaNapam organization only. Unauthorized access, use, distribution, or reproduction is strictly prohibited.
+  <p>
+    A Next.js + Socket.IO platform for real-time, WebRTC-powered conversations between strangers,
+    with no profile required and privacy built into every layer.
+  </p>
 
-[![Download APK](https://img.shields.io/badge/Download-Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NawaNapam/NawaNapam.website/releases/latest/download/nawanapam.apk)
+  <p>
+    <a href="https://github.com/NawaNapam/nawanapam-core/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/NawaNapam/nawanapam-core/ci.yml?branch=main&label=CI&logo=github" alt="CI status" /></a>
+    <a href="https://github.com/NawaNapam/nawanapam-core/actions/workflows/android-build.yml"><img src="https://img.shields.io/github/actions/workflow/status/NawaNapam/nawanapam-core/android-build.yml?branch=main&label=Android%20Build&logo=android&logoColor=white" alt="Android build status" /></a>
+    <a href="https://github.com/NawaNapam/nawanapam-core/releases"><img src="https://img.shields.io/github/v/release/NawaNapam/nawanapam-core?label=release&sort=semver" alt="Latest release" /></a>
+    <a href="https://github.com/NawaNapam/nawanapam-core/commits/main"><img src="https://img.shields.io/github/last-commit/NawaNapam/nawanapam-core" alt="Last commit" /></a>
+    <img src="https://img.shields.io/badge/platform-web%20%7C%20android-informational" alt="Platform: Web and Android" />
+    <a href="./LICENCE"><img src="https://img.shields.io/badge/license-proprietary-lightgrey" alt="License: Proprietary" /></a>
+  </p>
 
+  <p>
+    <a href="https://www.nawanapam.com"><strong>Website</strong></a> ·
+    <a href="https://github.com/NawaNapam/nawanapam-core/releases/latest/download/nawanapam.apk"><strong>Download Android APK</strong></a> ·
+    <a href="#getting-started"><strong>Getting Started</strong></a> ·
+    <a href="#roadmap"><strong>Roadmap</strong></a>
+  </p>
 </div>
 
-A modern, real-time anonymous video chat platform built with Next.js and Socket.IO. Connect with random strangers worldwide through instant video calls with end-to-end privacy.
+<br />
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Project Structure](#project-structure)
+- [Android App](#android-app)
+- [Security](#security)
+- [API Overview](#api-overview)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Development Workflow](#development-workflow)
+- [FAQ](#faq)
+- [License](#license)
+
+---
+
+## Overview
+
+**NawaNapam** connects two strangers over live video with no sign-up friction — an anonymous session is enough to start talking. The platform pairs users in real time, negotiates a peer-to-peer WebRTC call for media, and layers in text chat, moderation tooling, and mobile delivery via a native Android wrapper.
+
+This repository is the **core monorepo**: a Next.js frontend, an Express/Socket.IO realtime backend, and the Capacitor project that ships the Android app. It exists to give NawaNapam's team a single, coherent codebase for the web app, the matching/signaling server, and the admin console that keeps the platform safe to use.
+
+> Access to this repository and its source is governed by the [LICENCE](./LICENCE) — see [License](#license) below.
 
 ## Features
 
-- **Anonymous Video Chat**: Connect with strangers instantly without revealing your identity
-- **Smart Matching**: Gender-based filtering (random, male, female) for better matching
-- **Real-time Communication**:
-  - WebRTC-powered HD video and audio streaming
-  - Live text chat during video sessions
-  - Instant connection in under 3 seconds
-- **Privacy First**:
-  - No profile creation required
-  - Anonymous authentication support
-  - Secure session management
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **Progressive Web App (PWA)**: Install and use as a native app
-- **Admin Dashboard**: Comprehensive moderation and analytics tools
-- **User Management**: Report system, moderation logs, and user banning
+<table>
+<tr>
+<td valign="top" width="50%">
+
+### 🎥 Real-Time Communication
+- HD peer-to-peer video and audio via WebRTC
+- Live text chat alongside the video session
+- Sub-3-second match-to-connect time
+- Socket.IO signaling with heartbeat-based liveness checks
+
+### 🎯 Matching
+- Gender-based preference filtering (random / male / female)
+- Redis-backed queue for low-latency pairing
+- Automatic re-match on skip or disconnect
+
+### 🔑 Authentication & Identity
+- Anonymous sessions — no profile required to start
+- Email/OTP and Google OAuth via NextAuth.js
+- Native login/signup flows for the Android app
+
+### 🛡️ Moderation & Trust
+- In-app reporting with a dedicated review queue
+- Moderation logs and user banning
+- Admin console with analytics and room oversight
+
+</td>
+<td valign="top" width="50%">
+
+### 📱 Mobile
+- Capacitor-wrapped Android app backed by the production site
+- Push notifications, native share, and status bar integration
+- Signed release builds via CI on tag push
+
+### ⚡ Performance & PWA
+- Installable Progressive Web App with offline support
+- Turbopack-powered builds and edge-optimized rendering
+- Background sync and push notifications (in progress)
+
+### 🔒 Security
+- CSRF protection, Helmet security headers, strict CSP
+- Redis-backed rate limiting on APIs and auth routes
+- Zod + express-validator input validation, bcrypt hashing
+
+### 🧭 Admin Console
+- Dashboard, analytics, and user management
+- Reports, moderation logs, and room inspection
+- Role-scoped admin sessions, separate from user auth
+
+</td>
+</tr>
+</table>
+
+## Screenshots
+
+<!--
+  Add screenshots to a `docs/screenshots/` directory and update the paths below.
+  Keeping these as lightweight placeholders keeps the README fast-loading until real assets are added.
+-->
+
+<div align="center">
+
+| Landing | Video Chat | Admin Console |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/landing.png" width="260" alt="Landing page placeholder" /> | <img src="docs/screenshots/video-chat.png" width="260" alt="Video chat placeholder" /> | <img src="docs/screenshots/admin-console.png" width="260" alt="Admin console placeholder" /> |
+
+</div>
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Client["Web / Android Client"] -->|HTTPS| App["Next.js App Router (fe)"]
+    App -->|Prisma| DB[(PostgreSQL)]
+    App -->|REST| RL[(Upstash Redis — rate limiting)]
+    Client <-->|Socket.IO| RT["Realtime Server (be — Express + Socket.IO)"]
+    RT -->|ioredis| Cache[(Redis — matching · sessions)]
+    Client <-.->|WebRTC media, P2P| Client
+```
+
+- **fe** (Next.js) serves the UI, handles auth, and exposes API routes backed by PostgreSQL via Prisma.
+- **be** (Express + Socket.IO) owns matching, chat relay, and WebRTC signaling, using Redis for queue state and session liveness.
+- Once matched, video/audio flows **directly between clients** over WebRTC — the server never touches call media.
+- A background worker (`be/src/workers/retryPersist.ts`) drains a Redis stream to durably persist call/session data with retry and backoff.
 
 ## Tech Stack
 
-### Frontend
+| Layer | Technology |
+|---|---|
+| Frontend framework | Next.js 15 (App Router, Turbopack), React 19, TypeScript |
+| Styling / UI | Tailwind CSS v4, Radix UI primitives, Framer Motion |
+| State & forms | Zustand, React Hook Form, Zod |
+| Auth | NextAuth.js (Prisma adapter), Google OAuth, bcryptjs |
+| Database | PostgreSQL, Prisma ORM |
+| Realtime backend | Node.js, TypeScript, Express 5, Socket.IO |
+| Cache / matching store | Redis (`ioredis`), Upstash Redis (rate limiting) |
+| Media | WebRTC, Cloudinary |
+| Email | Resend, React Email |
+| Push notifications | Firebase Admin, Capacitor Push Notifications |
+| Mobile | Capacitor 8 (Android) |
+| Hosting / CI | Vercel, GitHub Actions, Docker Compose (local Postgres) |
 
-- **Framework**: Next.js 15 (App Router)
-- **UI**: React 19, TailwindCSS, Radix UI
-- **Real-time**: Socket.IO Client
-- **Authentication**: NextAuth.js with Prisma adapter
-- **Database ORM**: Prisma
-- **State Management**: Zustand
-- **Forms**: React Hook Form + Zod validation
-- **Video/Audio**: WebRTC, getUserMedia API
-- **Styling**: Framer Motion, Tailwind Animate
+## Getting Started
 
-### Backend
+### Prerequisites
 
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **WebSocket**: Socket.IO
-- **Database**: Redis (for real-time matching and session management)
-- **Security**: Helmet, CORS, Rate Limiting
-- **Validation**: Express Validator
+| Requirement | Version |
+|---|---|
+| Node.js | 20+ (22+ if building the Android app) |
+| PostgreSQL | 15+ |
+| Redis | 6+ |
+| Java | 21 (Android builds only) |
 
-### Database
+### 1. Clone
 
-- **Primary DB**: PostgreSQL (via Prisma)
-- **Cache/Sessions**: Redis (ioredis)
+```bash
+git clone git@github.com:NawaNapam/nawanapam-core.git
+cd nawanapam-core
+```
+
+### 2. Database (local)
+
+```bash
+docker compose up -d   # starts PostgreSQL on localhost:5432
+```
+
+### 3. Backend
+
+```bash
+cd be
+npm install
+touch .env   # populate the values, see Environment Variables below
+npm run dev
+```
+
+### 4. Frontend
+
+```bash
+cd fe
+npm install
+touch .env   # populate the values, see Environment Variables below
+npx prisma generate
+npx prisma migrate dev
+npm run dev
+```
+
+### 5. Open the app
+
+- Frontend — `http://localhost:3000`
+- Backend — `http://localhost:8080`
+
+### Production build
+
+```bash
+# Frontend
+cd fe && npm run build && npm start
+
+# Backend
+cd be && npm run build && npm start
+```
+
+## Environment Variables
+
+### Frontend (`fe/.env`)
+
+| Variable | Required | Description |
+|---|:---:|---|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `NEXTAUTH_URL` | ✅ | Canonical app URL used by NextAuth |
+| `NEXTAUTH_SECRET` | ✅ | NextAuth session secret (32+ chars) |
+| `UPSTASH_REDIS_REST_URL` | ✅ | Upstash Redis REST endpoint (rate limiting) |
+| `UPSTASH_REDIS_REST_TOKEN` | ✅ | Upstash Redis REST token |
+| `NEXT_PUBLIC_SIGNALING_URL` | ✅ | URL of the backend Socket.IO server |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | – | Google OAuth credentials |
+| `RESEND_API_KEY` | – | Transactional email (welcome, OTP, admin alerts) |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | – | Media uploads |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | – | Push notification delivery |
+| `NEXT_SHARED_SECRET` | – | Shared secret for trusted fe ↔ be requests |
+| `NODE_ENV` | – | `development` \| `production` \| `test` |
+
+### Backend (`be/.env`)
+
+| Variable | Required | Description |
+|---|:---:|---|
+| `PORT` | – | HTTP/Socket.IO port (default `8080`) |
+| `REDIS_HOST` / `REDIS_PORT` | – | Redis connection (or use `REDIS_URL`) |
+| `REDIS_PASSWORD` / `REDIS_USERNAME` / `REDIS_TLS` | – | Redis auth and TLS options |
+| `STALE_MS` | – | Idle-session timeout used by the match handler |
+| `NEXT_SHARED_SECRET` | – | Must match the frontend's shared secret |
+
+> Additional tuning variables (`STREAM_*`, `HTTP_TIMEOUT_MS`, `INITIAL_BACKOFF_MS`, `MAX_BACKOFF_MS`) configure the retry-persist worker's Redis stream consumer — sensible defaults are used if unset.
 
 ## Project Structure
 
 ```
-├── be/                          # Backend server
+nawanapam-core/
+├── be/                        # Realtime backend (Express + Socket.IO)
 │   ├── src/
-│   │   ├── app.ts              # Express app setup
-│   │   ├── index.ts            # Server entry point
-│   │   ├── socket/             # Socket.IO handlers
-│   │   │   ├── authHandler.ts
-│   │   │   ├── matchHandler.ts
-│   │   │   ├── rtchandler.ts
-│   │   │   └── chatHandlers.ts
-│   │   └── utils/redis/        # Redis utilities
-│   └── redis/scripts/          # Lua scripts for atomic operations
+│   │   ├── socket/            # matchHandler, rtchandler, chatHandlers, authHandler…
+│   │   ├── services/          # socket.service.ts
+│   │   ├── workers/           # retryPersist.ts — durable session persistence
+│   │   └── utils/redis/       # Lua scripts for atomic matching ops
+│   └── redis/scripts/
 │
-├── fe/                          # Frontend application
+├── fe/                         # Frontend application (Next.js)
 │   ├── src/
-│   │   ├── app/                # Next.js app router
-│   │   │   ├── (routes)/       # Public routes
-│   │   │   ├── (admin)/        # Admin panel
-│   │   │   └── api/            # API routes
-│   │   ├── components/
-│   │   │   ├── custom/         # Custom components
-│   │   │   │   ├── VideoChat.tsx
-│   │   │   │   ├── Dashboard.tsx
-│   │   │   │   └── HeroSection.tsx
-│   │   │   └── ui/             # Reusable UI components
-│   │   ├── hooks/
-│   │   │   ├── SocketProvider.ts
-│   │   │   ├── useWebRTC.ts
-│   │   │   └── useRoomChat.ts
-│   │   ├── lib/                # Utilities
-│   │   └── stores/             # Zustand stores
-│   └── prisma/
-│       └── schema.prisma       # Database schema
+│   │   ├── app/
+│   │   │   ├── (routes)/       # Public + auth routes
+│   │   │   ├── (general)/      # Static pages (privacy, terms, founders…)
+│   │   │   ├── console/        # Admin dashboard, moderation, reports, analytics
+│   │   │   └── api/            # Next.js API routes
+│   │   ├── components/         # custom/, ui/, admin/, native/
+│   │   ├── hooks/               # useWebRTC, useRoomChat, SocketProvider…
+│   │   ├── lib/                 # security, rate-limit, email, env-validation
+│   │   ├── services/             # auth, notifications, share, storage
+│   │   └── stores/                # Zustand stores
+│   ├── prisma/schema.prisma
+│   └── android/                    # Capacitor Android project
+│
+├── .github/workflows/                # CI + Android build pipelines
+└── docker-compose.yml                 # Local PostgreSQL
 ```
-
-## Installation
-
-### Prerequisites
-
-- Node.js 20+ and npm/yarn
-- PostgreSQL database
-- Redis server
-- (Optional) ADB for mobile development
-
-### 1. Clone the repository
-
-> **Note**: You must be an authorized employee with repository access.
-
-```bash
-git clone https://github.com/NawaNapam/NawaNapam.website.git
-cd NawaNapam.website
-```
-
-### 2. Backend Setup
-
-```bash
-cd be
-npm install
-
-# Create .env file
-cat > .env << EOF
-PORT=8080
-REDIS_HOST=localhost
-REDIS_PORT=6379
-STALE_MS=30000
-EOF
-
-# Start the backend
-npm run dev
-```
-
-### 3. Frontend Setup
-
-```bash
-cd fe
-npm install
-
-# Create .env file
-cat > .env << EOF
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/nawanapam"
-
-# NextAuth
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
-
-# Socket.IO
-NEXT_PUBLIC_SIGNALING_URL=http://localhost:8080
-
-# Redis (for rate limiting)
-UPSTASH_REDIS_REST_URL=your-redis-url
-UPSTASH_REDIS_REST_TOKEN=your-redis-token
-
-# Email (optional - for notifications)
-RESEND_API_KEY=your-resend-key
-EOF
-
-# Setup database
-npx prisma generate
-npx prisma migrate dev
-
-# Start the frontend
-npm run dev
-```
-
-### 4. Access the application
-
-- **Frontend**: http://localhost:3000
-- **Backend**: http://localhost:8080
-
-## Usage
-
-### For Users
-
-1. **Sign Up/Sign In**: Create an account or sign in (anonymous mode available)
-2. **Choose Preference**: Select gender preference (random/male/female)
-3. **Start Matching**: Click "Start" to begin finding a chat partner
-4. **Video Chat**: Once matched, enjoy HD video chat with text messaging
-5. **Next/End**: Skip to next person or end the session
-
-### For Developers
-
-#### Run with ADB (Android Mobile Testing)
-
-```bash
-# Frontend
-cd fe
-npm run dev:mobile
-
-# Backend
-cd be
-npm run dev:mobile
-```
-
-#### Build for Production
-
-```bash
-# Frontend
-cd fe
-npm run build
-npm start
-
-# Backend
-cd be
-npm run build
-npm start
-```
-
-## Security Features
-
-- **CSRF Protection**: Edge CSRF tokens for forms
-- **Rate Limiting**: Upstash Redis-based rate limiting
-- **Helmet.js**: Security headers and policies
-- **Password Security**: Bcrypt hashing
-- **Input Validation**: Zod schemas and express-validator
-- **Session Management**: Secure cookie-based sessions
-- **Environment Variables**: Sensitive data in .env files
-
-## PWA Features
-
-- Offline support
-- Install to home screen
-- App-like experience
-- Optimized performance
-- Background sync
-- Push notifications (coming soon)
 
 ## Android App
 
-The `fe/android` directory is a [Capacitor](https://capacitorjs.com/) native
-wrapper that points at the production site (`https://www.nawanapam.com`), so
-building the APK does **not** require a local Next.js build.
+`fe/android` is a [Capacitor](https://capacitorjs.com/) native wrapper pointed at the production site (`https://www.nawanapam.com`), so building the APK does **not** require a local Next.js build.
 
-### Getting the APK
+- **Debug builds** — every push/PR touching `fe/**` builds a debug APK, downloadable from that commit's [Actions run](https://github.com/NawaNapam/nawanapam-core/actions/workflows/android-build.yml) under **Artifacts**.
+- **Signed releases** — pushing a tag matching `android-v*` (e.g. `android-v1.0.0`) builds a signed release APK and publishes it as a GitHub Release asset.
 
-[![Download APK](https://img.shields.io/badge/Download-Android%20APK-3DDC84?logo=android&logoColor=white)](https://github.com/NawaNapam/NawaNapam.website/releases/latest/download/nawanapam.apk)
+<details>
+<summary><strong>Enable signed release builds</strong></summary>
 
-Click the badge above (or [Releases](https://github.com/NawaNapam/NawaNapam.website/releases)) to grab the latest signed release APK. Every push to `main` also builds a debug APK, downloadable from that commit's [Actions run](https://github.com/NawaNapam/NawaNapam.website/actions/workflows/android-build.yml) under **Artifacts**.
+Release builds are signed using an environment-driven `signingConfig` in [`fe/android/app/build.gradle`](fe/android/app/build.gradle) — it's a no-op unless all four secrets are present, so debug builds are unaffected.
 
-### Build workflow (CI)
+Add these repository secrets (**Settings → Secrets and variables → Actions**):
 
-[`.github/workflows/android-build.yml`](.github/workflows/android-build.yml):
-
-- **Push/PR touching `fe/**`** → builds a **debug APK** and uploads it as a workflow artifact.
-- **Tag push matching `android-v*`** (e.g. `android-v1.0.0`) → builds a **signed release APK** and publishes it as a GitHub Release asset (`nawanapam.apk`), which is what the download badge links to.
-
-#### Android release signing
-
-Release builds are signed using an environment-driven `signingConfig` in [`fe/android/app/build.gradle`](fe/android/app/build.gradle) — it's a no-op unless all four are present, so local/CI debug builds are unaffected. To enable signed releases, add these repo secrets (Settings → Secrets and variables → Actions):
-
-| Secret                      | Value                                       |
-| --------------------------- | -------------------------------------------- |
-| `ANDROID_KEYSTORE_BASE64`   | `base64 -w0 release.keystore` output          |
-| `ANDROID_KEYSTORE_PASSWORD` | keystore password                             |
-| `ANDROID_KEY_ALIAS`         | key alias                                     |
-| `ANDROID_KEY_PASSWORD`      | key password                                  |
-
-Then push a tag to cut a release:
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 release.keystore` output |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore password |
+| `ANDROID_KEY_ALIAS` | key alias |
+| `ANDROID_KEY_PASSWORD` | key password |
 
 ```bash
 git tag android-v1.0.0
 git push origin android-v1.0.0
 ```
 
-### Building & installing locally
+</details>
+
+<details>
+<summary><strong>Build & install locally</strong></summary>
 
 ```bash
 cd fe
@@ -272,107 +319,41 @@ npm install
 npx cap sync android
 
 cd android
-./gradlew assembleDebug          # or assembleRelease with the env vars above set
+./gradlew assembleDebug   # or assembleRelease with the env vars above set
 
-# Install straight to a connected/USB-debugging device via ADB
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Without `adb`, copy the APK to the phone (USB transfer, Drive, etc.), open it from a file manager, and allow **"Install unknown apps"** for that app when prompted — Android will then walk through the install.
+Without `adb`, transfer the APK to the device and open it from a file manager, allowing **"Install unknown apps"** when prompted.
 
-## Customization
+</details>
 
-### Styling
+## Security
 
-- Edit TailwindCSS config in `fe/tailwind.config.ts`
-- Custom styles in `fe/src/app/globals.css`
-- Theme customization via `next-themes`
+| Layer | Implementation |
+|---|---|
+| Transport | HSTS, strict CSP, and standard security headers via `next.config.ts` |
+| CSRF | Edge CSRF tokens on state-changing forms |
+| Rate limiting | Upstash Redis — tiered limits for API, auth, and sensitive routes; `express-rate-limit` on the backend |
+| Input validation | Zod schemas (frontend), `express-validator` (backend), DOMPurify HTML sanitization |
+| Passwords | bcrypt hashing, strong-password policy |
+| Sessions | Secure, cookie-based via NextAuth; separate `Admin` / `AdminSession` models for the console |
+| API hardening | Method + content-type validation, origin verification, constant-time comparisons, request size limits |
+| Backend | Helmet security headers, CORS allow-listing |
 
-### Components
+## API Overview
 
-- UI components in `fe/src/components/ui/`
-- Custom components in `fe/src/components/custom/`
-- Radix UI primitives for accessibility
+The frontend exposes Next.js API routes under `fe/src/app/api/` for auth, user profile/settings, and admin operations (reports, moderation, analytics) — scoped by session role and rate-limited per route. The realtime backend does not expose REST endpoints; it communicates entirely over **Socket.IO events**:
 
-## Configuration
+| Namespace | Responsibility |
+|---|---|
+| `auth` | Session handshake and identity verification |
+| `match` | Queueing and pairing users by preference |
+| `rtc` | WebRTC offer/answer/ICE signaling relay |
+| `chat` | In-session text messages |
+| `heartbeat` | Liveness detection and stale-session cleanup |
 
-### Frontend Environment Variables
-
-```env
-DATABASE_URL=              # PostgreSQL connection string
-NEXTAUTH_URL=             # App URL
-NEXTAUTH_SECRET=          # NextAuth secret key
-NEXT_PUBLIC_SIGNALING_URL= # Backend Socket.IO URL
-UPSTASH_REDIS_REST_URL=   # Redis URL for rate limiting
-UPSTASH_REDIS_REST_TOKEN= # Redis token
-RESEND_API_KEY=           # Email service API key
-```
-
-### Backend Environment Variables
-
-```env
-PORT=8080                 # Server port
-REDIS_HOST=localhost      # Redis host
-REDIS_PORT=6379          # Redis port
-STALE_MS=30000           # Stale connection timeout
-```
-
-## Database Schema
-
-Key models:
-
-- **User**: User accounts and profiles
-- **Account**: OAuth provider accounts
-- **Session**: User sessions
-- **Room**: Chat rooms
-- **Participant**: Room participants
-- **Message**: Chat messages
-- **Report**: User reports
-- **ModerationLog**: Moderation actions
-- **Interest**: User interests
-
-See [fe/prisma/schema.prisma](fe/prisma/schema.prisma) for full schema.
-
-## Internal Development Guidelines
-
-> **For Authorized Employees Only**
-
-Please follow these steps when working on the codebase:
-
-1. Create a feature branch: `git checkout -b feature/amazing-feature`
-2. Commit your changes: `git commit -m 'Add amazing feature'`
-3. Push to the branch: `git push origin feature/amazing-feature`
-4. Open a Pull Request for team review
-5. Await approval from team lead before merging
-
-### Development Guidelines
-
-- Follow TypeScript best practices
-- Write meaningful commit messages
-- Add comments for complex logic
-- Test on multiple devices/browsers
-- Ensure accessibility standards
-- **Never share code or credentials outside the organization**
-- **Always use VPN when accessing production systems**
-
-## License
-
-**Proprietary and Confidential**
-
-This codebase is the exclusive property of NawaNapam organization. All rights reserved.
-
-- No public distribution
-- No unauthorized use or modification
-- No sharing outside the organization
-- Internal use by authorized employees only
-
-For licensing inquiries, contact the legal department.
-
-## Known Issues
-
-- Camera switching on iOS requires page refresh
-- Some Android devices need manual permissions
-- WebRTC connections may fail on restrictive networks
+Full endpoint-level documentation is intentionally out of scope here — read the relevant handler in `be/src/socket/` or `fe/src/app/api/` for exact contracts.
 
 ## Roadmap
 
@@ -381,44 +362,64 @@ For licensing inquiries, contact the legal department.
 - [ ] Virtual backgrounds
 - [ ] Gifts and reactions
 - [ ] Advanced filtering (interests, location)
-- [ ] Mobile apps (React Native)
-- [ ] AI moderation
-- [ ] End-to-end encryption
+- [ ] AI-assisted moderation
+- [ ] End-to-end encrypted calls
 - [ ] Voice-only mode
-- [ ] Recording feature (with consent)
+- [ ] Consent-based session recording
 
-## Internal Support
+## Contributing
 
-For issues, questions, or suggestions (employees only):
+1. Create a branch from `main`: `git checkout -b feature/short-description`
+2. Make focused commits using [Conventional Commits](https://www.conventionalcommits.org/) style (`feat:`, `fix:`, `chore:`, …)
+3. Ensure `npm run lint` and `npm run build` pass in `fe/`, and `npm run build` passes in `be/`
+4. Open a pull request describing the change and its motivation
+5. Address review feedback — CI (`ci.yml`, `android-build.yml` where relevant) must be green before merge
 
-- **Issues**: [GitHub Issues](https://github.com/NawaNapam/NawaNapam.website/issues) (private repository)
-- **Internal Chat**: Contact the development team on Slack/Teams
-- **Email**: support@nawanapam.com (internal only)
+Contribution access to this repository is granted per the terms of the [LICENCE](./LICENCE).
 
-## Links
+## Development Workflow
 
-- **Website**: [nawanapam.com](https://nawanapam.com)
+- `main` is the protected, deployable branch — Vercel deploys the frontend from it automatically.
+- Feature and fix branches merge via pull request; direct pushes to `main` are discouraged.
+- `.github/workflows/ci.yml` lints and builds both `fe` and `be` on every push/PR.
+- `.github/workflows/android-build.yml` builds a debug APK on `fe/**` changes and a signed release APK on `android-v*` tags.
 
-## Development Team
+## FAQ
 
-- **NawaNapam Internal Development Team**
-- For team roster and contacts, see internal documentation
+<details>
+<summary><strong>Is NawaNapam Core open source?</strong></summary>
+<br />
+No. The repository is source-available to authorized contributors under a proprietary license — see <a href="./LICENCE">LICENCE</a>.
+</details>
 
-## Acknowledgments
+<details>
+<summary><strong>Does video/audio pass through the server?</strong></summary>
+<br />
+No. The backend only performs WebRTC signaling (offer/answer/ICE exchange). Media streams flow peer-to-peer between clients.
+</details>
 
-- Next.js team for the amazing framework
-- Socket.IO for real-time communication
-- Prisma for database tooling
-- Radix UI for accessible components
-- Vercel for hosting and analytics
+<details>
+<summary><strong>Do I need Redis and PostgreSQL to run this locally?</strong></summary>
+<br />
+Yes — PostgreSQL backs persistent data (users, rooms, reports) via Prisma, and Redis backs matching, session state, and rate limiting.
+</details>
+
+<details>
+<summary><strong>Can I build the Android app without a signing key?</strong></summary>
+<br />
+Yes. Debug builds (<code>assembleDebug</code>) don't require signing secrets — those are only needed for signed <code>android-v*</code> release builds.
+</details>
+
+## License
+
+This project is licensed under a **Proprietary Internal-Use License** — see [LICENCE](./LICENCE) for full terms. Use, modification, and distribution are restricted to parties explicitly authorized by the copyright holder.
 
 ---
 
 <div align="center">
 
-**© 2026 NawaNapam Organization - Proprietary & Confidential**
-**For Internal Use by Authorized Employees Only**
+Built by the NawaNapam team · [nawanapam.com](https://www.nawanapam.com)
 
-<img src="https://capsule-render.vercel.app/api?type=rect&color=0:1f2937,100:111827&height=80&section=footer&animation=fadeIn" width="100%" alt="" />
+<sub>© 2026 NawaNapam. All rights reserved.</sub>
 
 </div>
