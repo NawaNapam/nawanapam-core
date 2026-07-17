@@ -1,6 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+let resendClient: Resend | null = null;
+
+const getResendClient = (): Resend => {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+};
 
 const generateOtp = (size: number): string => {
   const characters = "0123456789";
@@ -13,7 +20,7 @@ const generateOtp = (size: number): string => {
 };
 
 export const sendWelcomeEmail = async (to: string) => {
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResendClient().emails.send({
     from: "NawaNapam <welcome@mail.nawanapam.com>",
     to,
     subject: "Welcome to NawaNapam",
@@ -90,7 +97,7 @@ export const sendWelcomeEmail = async (to: string) => {
 export const sendOtpEmail = async (to: string) => {
   const otp = generateOtp(6);
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResendClient().emails.send({
     from: "NawaNapam <otp@mail.nawanapam.com>",
     to,
     subject: "Your NawaNapam Verification Code",
@@ -183,7 +190,7 @@ export const sendAdminNotificationEmail = async (
   subject: string,
   message: string,
 ) => {
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResendClient().emails.send({
     from: "NawaNapam <admin@mail.nawanapam.com>",
     to,
     subject,
