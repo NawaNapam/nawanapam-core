@@ -34,14 +34,14 @@
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Features](#features)
-  - [Real-Time Communication](#real-time-communication)
-  - [Matching](#matching)
-  - [Authentication \& Identity](#authentication--identity)
-  - [Moderation \& Trust](#moderation--trust)
-  - [Mobile](#mobile)
-  - [Performance \& PWA](#performance--pwa)
-  - [Security](#security)
-  - [Admin Console](#admin-console)
+  - [ Real-Time Communication](#-real-time-communication)
+  - [ Matching](#-matching)
+  - [ Authentication \& Identity](#-authentication--identity)
+  - [ Moderation \& Trust](#-moderation--trust)
+  - [ Mobile](#-mobile)
+  - [ Performance \& PWA](#-performance--pwa)
+  - [ Security](#-security)
+  - [ Admin Console](#-admin-console)
 - [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
@@ -58,7 +58,7 @@
   - [Backend (`be/.env`)](#backend-beenv)
 - [Project Structure](#project-structure)
 - [Android App](#android-app)
-- [Security](#security-1)
+- [Security](#security)
 - [API Overview](#api-overview)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -252,12 +252,12 @@ cd be && npm run build && npm start
 
 | Variable                                                                 | Required | Description                                      |
 | ------------------------------------------------------------------------ | :------: | ------------------------------------------------ |
-| `DATABASE_URL`                                                           |   Yes   | PostgreSQL connection string                     |
-| `NEXTAUTH_URL`                                                           |   Yes   | Canonical app URL used by NextAuth               |
-| `NEXTAUTH_SECRET`                                                        |   Yes   | NextAuth session secret (32+ chars)              |
-| `UPSTASH_REDIS_REST_URL`                                                 |   Yes   | Upstash Redis REST endpoint (rate limiting)      |
-| `UPSTASH_REDIS_REST_TOKEN`                                               |   Yes   | Upstash Redis REST token                         |
-| `NEXT_PUBLIC_SIGNALING_URL`                                              |   Yes   | URL of the backend Socket.IO server              |
+| `DATABASE_URL`                                                           |   Yes    | PostgreSQL connection string                     |
+| `NEXTAUTH_URL`                                                           |   Yes    | Canonical app URL used by NextAuth               |
+| `NEXTAUTH_SECRET`                                                        |   Yes    | NextAuth session secret (32+ chars)              |
+| `UPSTASH_REDIS_REST_URL`                                                 |   Yes    | Upstash Redis REST endpoint (rate limiting)      |
+| `UPSTASH_REDIS_REST_TOKEN`                                               |   Yes    | Upstash Redis REST token                         |
+| `NEXT_PUBLIC_SIGNALING_URL`                                              |   Yes    | URL of the backend Socket.IO server              |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                              |    –     | Google OAuth credentials                         |
 | `RESEND_API_KEY`                                                         |    –     | Transactional email (welcome, OTP, admin alerts) |
 | `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` |    –     | Media uploads                                    |
@@ -466,4 +466,9 @@ Built by the NawaNapam team · [nawanapam.com](https://www.nawanapam.com)
 
 <sub>© 2026 NawaNapam. All rights reserved.</sub>
 
+</div>
+
+<div align="center">
+<sub>In more detail</sub>
+<iframe src="https://gamma.app/embed/u2s18vwgj5gkdwm" style="width: 700px; max-width: 100%; height: 450px" allow="fullscreen" title="Instant. Anonymous. Live."></iframe>
 </div>
