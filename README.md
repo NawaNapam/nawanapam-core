@@ -470,5 +470,8 @@ Built by the NawaNapam team · [nawanapam.com](https://www.nawanapam.com)
 
 <div align="center">
 <sub>In more detail</sub>
-<iframe src="https://gamma.app/embed/u2s18vwgj5gkdwm" style="width: 700px; max-width: 100%; height: 450px" allow="fullscreen" title="Instant. Anonymous. Live."></iframe>
+<br />
+
+[![View the full presentation on Gamma](https://img.shields.io/badge/Gamma-View%20full%20presentation-6E56CF?style=for-the-badge&logo=googleslides&logoColor=white)](https://gamma.app/embed/u2s18vwgj5gkdwm)
+
 </div>
